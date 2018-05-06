@@ -20,7 +20,19 @@ public class Game {
     * */
     private Collection<Card> hand = new ArrayList<>();
 
-    public Game(){ }
+    private int playersNumber = 2;
+
+    public Game(int playerNumber){
+        this.playersNumber = playerNumber;
+    }
+
+    public void setPlayersNumber(int playersNumber) {
+        this.playersNumber = playersNumber;
+    }
+
+    public int getPlayersNumber() {
+        return playersNumber;
+    }
 
     public Collection<Card> getGameDeck(){
         return Collections.unmodifiableCollection(deck);
