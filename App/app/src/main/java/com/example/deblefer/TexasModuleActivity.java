@@ -1,19 +1,20 @@
 package com.example.deblefer;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 
 import com.example.deblefer.Classes.Card;
+import com.example.deblefer.Classes.CustomDialog;
 import com.example.deblefer.Classes.Deck;
 import com.example.deblefer.Classes.Game;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 public class TexasModuleActivity extends AppCompatActivity {
@@ -35,6 +36,16 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardButtons.add((ImageButton)findViewById(R.id.imageButton4));
         cardButtons.add((ImageButton)findViewById(R.id.imageButton5));
         cardButtons.add((ImageButton)findViewById(R.id.imageButton6));
+
+        ImageButton clickButton = findViewById(R.id.imageButton1);
+        clickButton.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
+                AlertDialog alertDialog = dialog.showDialog(3);
+                alertDialog.show();
+            }
+        });
     }
 
     @Override
