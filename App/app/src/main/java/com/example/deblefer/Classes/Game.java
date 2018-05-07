@@ -10,7 +10,7 @@ public class Game {
     /*
     * talia kart
     * */
-    private Collection<Card> deck = Deck.getModifableDeck();
+    private Collection<Card> deck = Deck.getModifableDeckAsSet();
     /*
     * to co jest na stole
     * */

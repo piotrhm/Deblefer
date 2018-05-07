@@ -1,39 +1,40 @@
 package com.example.deblefer;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageButton;
 
+import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.Deck;
+import com.example.deblefer.Classes.Game;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 public class TexasModuleActivity extends AppCompatActivity {
 
-    //List<ImageButton> imageButtons = new ArrayList<>();
+    private List<ImageButton> cardButtons = new ArrayList<>();
+    private Collection<Card> deck = Deck.getModifableDeckAsSet();
+    private List<Card> used = new ArrayList<>();
+
+    private Game game = new Game(2);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_texas_module);
-        /*imageButtons.add((ImageButton) findViewById(R.id.imageButton0));
-        imageButtons.add((ImageButton) findViewById(R.id.imageButton1));
-        imageButtons.add((ImageButton)findViewById(R.id.imageButton2));
-        imageButtons.add((ImageButton)findViewById(R.id.imageButton3));
-        imageButtons.add((ImageButton)findViewById(R.id.imageButton4));
-        imageButtons.add((ImageButton)findViewById(R.id.imageButton5));
-        imageButtons.add((ImageButton)findViewById(R.id.imageButton6));*//*
-        imageButtons.get(0).setOnClickListener(v -> System.out.print("hehe"));*/
-        //Deck.initializeCardsImagesIds(this);
-        //imageButtons.get(0).setImageResource(Deck.getCardImageId(Deck.getModifableDeck().iterator().next()));
+        cardButtons.add((ImageButton) findViewById(R.id.imageButton0));
+        cardButtons.add((ImageButton) findViewById(R.id.imageButton1));
+        cardButtons.add((ImageButton)findViewById(R.id.imageButton2));
+        cardButtons.add((ImageButton)findViewById(R.id.imageButton3));
+        cardButtons.add((ImageButton)findViewById(R.id.imageButton4));
+        cardButtons.add((ImageButton)findViewById(R.id.imageButton5));
+        cardButtons.add((ImageButton)findViewById(R.id.imageButton6));
     }
 
     @Override
@@ -56,5 +57,10 @@ public class TexasModuleActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private Card getCardFromDialog(){
+        return null;
+    }
+
 
 }

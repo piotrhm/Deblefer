@@ -1,24 +1,44 @@
 package com.example.deblefer.Classes;
 
-public class Card {;
+import android.support.annotation.NonNull;
 
-    public enum Rank { DEUCE, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE }
+public class Card extends Face {
 
-    public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }
+    public enum Rank { DEUCE(2), THREE(3), FOUR(4), FIVE(5), SIX(6), SEVEN(7), EIGHT(8), NINE(9), TEN(10),
+        JACK(11), QUEEN(12), KING(13), ACE(14);
+        private int power;
+        Rank(int power){
+            this.power = power;
+        }
+
+        public Integer getPower() {
+            return power;
+        }
+    }
+
+    public enum Suit { CLUBS(1), DIAMONDS(2), HEARTS(3), SPADES(4);
+        private int power;
+        Suit(int power){
+            this.power = power;
+        }
+
+        public Integer getPower() {
+            return power;
+        }
+    }
 
     private final int id;
-    private  final Rank rank;
-    private  final Suit suit;
 
     Card(Rank rank, Suit suit, int id) {
-        this.rank = rank;
-        this.suit = suit;
+        super(rank, suit);
         this.id = id;
     }
 
-    public Rank getRank() { return rank; }
-    public Suit getSuit() { return suit; }
-    public int getId(){ return id;}
+    public Face getMyFace(){
+        return new Face(this.rank, this.suit);
+    }
+
+    public Integer getId(){ return id;}
 
     public String toString() {
         return rank.toString().toLowerCase()
