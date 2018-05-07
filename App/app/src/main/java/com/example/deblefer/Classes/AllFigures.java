@@ -49,7 +49,6 @@ public class AllFigures {
         for(Card.Rank r : Card.Rank.values()){
             for(int i=0;i<4;i++){
                 ranks.add(r);
-                System.out.println(ranks);
                 figures.add(new Figure(ranks,false));
             }
             ranks.clear();

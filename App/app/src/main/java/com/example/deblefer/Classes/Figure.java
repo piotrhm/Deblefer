@@ -1,5 +1,7 @@
 package com.example.deblefer.Classes;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +35,7 @@ public class Figure implements Comparable<Figure>{
     }
 
     @Override
-    public int compareTo(Figure o) {
+    public int compareTo(@NonNull Figure o) {
 
         Category category1,category2;
         if(!this.name.equals("flush")) category1 = Category.valueOf(this.name.substring(0,this.name.lastIndexOf("(")).toUpperCase());
@@ -41,6 +43,7 @@ public class Figure implements Comparable<Figure>{
         if(!o.name.equals("flush")) category2 = Category.valueOf(o.name.substring(0,o.name.lastIndexOf("(")).toUpperCase());
         else category2 = Category.FLUSH;
         if(category1!=category2) return category1.compareTo(category2);
+        if(category1==Category.FLUSH) return 0;
 
         String ranksList1 = this.name.substring(this.name.indexOf("(")+1,this.name.indexOf(")")).toUpperCase();
         String ranksList2 = (o).name.substring(o.name.indexOf("(")+1,o.name.indexOf(")")).toUpperCase();
