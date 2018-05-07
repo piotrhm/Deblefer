@@ -59,6 +59,7 @@ public class CustomDialog {
                         // User clicked OK, so save the mSelectedItems results somewhere
                         // or return them to the component that opened the dialog
                         clickedCard = clickedCardTmp;
+                        count = 0;
                     }
                 })
                 .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
