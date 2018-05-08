@@ -2,6 +2,7 @@ package com.example.deblefer;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,11 +28,12 @@ public class TexasModuleActivity extends AppCompatActivity {
 
     private Game game = new Game(2);
     private List<ImageView> cardImages = new ArrayList<>();
-    private Button addButton = findViewById(R.id.addCardButton);
+    private FloatingActionButton addButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Deck.initializeCardsImagesIds(this);
         setContentView(R.layout.activity_texas_module);
         cardImages.add((ImageView) findViewById(R.id.cardImageView0));
         cardImages.add((ImageView) findViewById(R.id.cardImageView1));
@@ -40,6 +42,8 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView4));
         cardImages.add((ImageView)findViewById(R.id.cardImageView5));
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
+        addButton = findViewById(R.id.addCardButton);
+
         addButton.setOnClickListener((View v) -> {
             Card card = getCardFromDialog();
             if(card == null)
