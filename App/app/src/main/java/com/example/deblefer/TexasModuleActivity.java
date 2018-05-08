@@ -1,5 +1,4 @@
 package com.example.deblefer;
-
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -65,7 +64,7 @@ public class TexasModuleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Deck.initializeCardsImagesIds(this);
-        setContentView(R.layout.activity_texas_module);
+        setContentView(R.layout.activity_texas_module_constraint);
         cardImages.add((ImageView) findViewById(R.id.cardImageView0));
         cardImages.add((ImageView) findViewById(R.id.cardImageView1));
         cardImages.add((ImageView)findViewById(R.id.cardImageView2));
