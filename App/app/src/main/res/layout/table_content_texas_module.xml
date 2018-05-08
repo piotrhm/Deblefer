@@ -3,81 +3,91 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="wrap_content">
 
-    <ImageButton
-        android:id="@+id/imageButton1"
-        android:layout_width="75dp"
-        android:layout_height="100dp"
-        android:padding="5dp"
-        android:layout_below="@+id/imageButton2"
-        android:layout_toEndOf="@+id/imageButton0"
-        app:srcCompat="@drawable/unused"
-        android:scaleType="fitCenter"
-        android:layout_toRightOf="@+id/imageButton0" />
-
-    <ImageButton
-        android:id="@+id/imageButton6"
-        android:layout_width="75dp"
+    <ImageView
+        android:id="@+id/cardImageView6"
+        android:layout_width="77dp"
         android:layout_height="100dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:padding="5dp"
-        app:srcCompat="@drawable/unused"
-        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/reverse"
         android:layout_alignParentRight="true" />
 
-    <ImageButton
-        android:id="@+id/imageButton5"
-        android:layout_width="75dp"
+    <ImageView
+        android:id="@+id/cardImageView5"
+        android:layout_width="77dp"
         android:layout_height="100dp"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/imageButton4"
+        android:layout_toEndOf="@+id/cardImageView4"
         android:padding="5dp"
-        app:srcCompat="@drawable/unused"
-        android:scaleType="fitCenter"
-        android:layout_toRightOf="@+id/imageButton4" />
+        app:srcCompat="@drawable/reverse"
+        android:layout_toRightOf="@+id/cardImageView4" />
 
-    <ImageButton
-        android:id="@+id/imageButton4"
-        android:layout_width="75dp"
+    <ImageView
+        android:id="@+id/cardImageView4"
+        android:layout_width="77dp"
         android:layout_height="100dp"
-        android:padding="5dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        app:srcCompat="@drawable/unused"
-        android:scaleType="fitCenter"/>
+        android:padding="5dp"
+        app:srcCompat="@drawable/reverse" />
 
-    <ImageButton
-        android:id="@+id/imageButton3"
-        android:layout_width="75dp"
+    <ImageView
+        android:id="@+id/cardImageView3"
+        android:layout_width="77dp"
         android:layout_height="100dp"
         android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/imageButton4"
+        android:layout_toEndOf="@+id/cardImageView2"
         android:padding="5dp"
-        app:srcCompat="@drawable/unused"
-        android:scaleType="fitCenter"
-        android:layout_toLeftOf="@+id/imageButton4" />
+        app:srcCompat="@drawable/reverse"
+        android:layout_toRightOf="@+id/cardImageView2" />
 
-    <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="75dp"
+    <ImageView
+        android:id="@+id/cardImageView2"
+        android:layout_width="77dp"
         android:layout_height="100dp"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/imageButton3"
         android:padding="5dp"
-        app:srcCompat="@drawable/unused"
-        android:scaleType="fitCenter"
-        android:layout_toLeftOf="@+id/imageButton3" />
+        app:srcCompat="@drawable/reverse"
+        android:layout_alignParentLeft="true" />
 
-    <ImageButton
-        android:id="@+id/imageButton0"
-        android:layout_width="75dp"
+    <ImageView
+        android:id="@+id/cardImageView1"
+        android:layout_width="77dp"
         android:layout_height="100dp"
         android:padding="5dp"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/imageButton2"
-        android:layout_marginStart="116dp"
-        app:srcCompat="@drawable/to_add"
-        android:scaleType="fitCenter"
+        android:layout_below="@+id/cardImageView2"
+        android:layout_marginStart="115dp"
+        app:srcCompat="@drawable/reverse"
         android:layout_alignParentLeft="true"
-        android:layout_marginLeft="116dp" />
+        android:layout_marginLeft="115dp" />
+
+    <ImageView
+        android:id="@+id/cardImageView0"
+        android:layout_width="77dp"
+        android:layout_height="100dp"
+        android:padding="5dp"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/cardImageView2"
+        android:layout_marginEnd="115dp"
+        app:srcCompat="@drawable/reverse"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="115dp" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/addCardButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="61dp"
+        android:layout_marginTop="129dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:srcCompat="@android:drawable/ic_menu_add"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="61dp" />
+
 </RelativeLayout>
