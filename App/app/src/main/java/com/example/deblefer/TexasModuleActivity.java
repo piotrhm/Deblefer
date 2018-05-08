@@ -1,5 +1,6 @@
 package com.example.deblefer;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -10,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.example.deblefer.Classes.Card;
+import com.example.deblefer.Classes.CustomDialog;
 import com.example.deblefer.Classes.Deck;
 import com.example.deblefer.Classes.Game;
 
