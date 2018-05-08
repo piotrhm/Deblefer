@@ -2,6 +2,7 @@ package com.example.deblefer.Classes;
 
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,19 +11,23 @@ import static org.junit.Assert.*;
 
 public class FigureTest {
     @Test
-    public void figureTest(){
+    public void figureTest() {
 
-        List<Card.Rank> ranks = new ArrayList<>(Arrays.asList(Card.Rank.DEUCE,Card.Rank.ACE,Card.Rank.THREE,Card.Rank.FOUR,Card.Rank.FIVE));
-        Figure f = new Figure(ranks,true);
-        assertEquals(f.toString(),"straight_flush(five)");
+        Card.Rank[] r = new Card.Rank[]{Card.Rank.FIVE};
+        List<Card.Rank> ranks = new ArrayList<>(Arrays.asList(r));
+        Figure f = new Figure(ranks, true, Figure.Category.STRAIGHT_FLUSH, r);
+        assertEquals(f.toString(), "straight_flush(five)");
 
         ranks.clear();
-        f = new Figure(ranks,true);
-        assertEquals(f.toString(),"flush");
+        r = new Card.Rank[]{Card.Rank.KING,Card.Rank.QUEEN};
+        ranks.addAll(new ArrayList<>(Arrays.asList(r)));
+        f = new Figure(ranks, false, Figure.Category.FULL_HOUSE, r);
+        assertEquals(f.toString(), "full_house(king_queen)");
 
-        ranks.addAll(new ArrayList<>(Arrays.asList(Card.Rank.QUEEN,Card.Rank.KING,Card.Rank.QUEEN,Card.Rank.KING,Card.Rank.KING)));
-        f = new Figure(ranks,false);
-        assertEquals(f.toString(),"full_house(king_queen)");
+        ranks.clear();
+        r = new Card.Rank[]{};
+        f = new Figure(ranks, true, Figure.Category.FLUSH, r);
+        assertEquals(f.toString(), "flush");
     }
-
 }
+

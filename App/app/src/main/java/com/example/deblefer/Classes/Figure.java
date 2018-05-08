@@ -3,25 +3,35 @@ package com.example.deblefer.Classes;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 public class Figure implements Comparable<Figure>{
 
-    public enum Category { HIGH_CARD, ONE_PAIR, TWO_PAIR, THREE_OF_A_KIND, STRAIGHT, FLUSH, FULL_HOUSE, FOUR_OF_A_KIND, STRAIGHT_FLUSH }
+    public enum Category {
+        HIGH_CARD(0), ONE_PAIR(1), TWO_PAIR(2), THREE_OF_A_KIND(3), STRAIGHT(4), FLUSH(5), FULL_HOUSE(6), FOUR_OF_A_KIND(7), STRAIGHT_FLUSH(8);
+
+        private int power;
+        Category(int power){
+            this.power = power;
+        }
+
+        public Integer getPower() {
+            return power;
+        }
+    }
 
     private final Collection<Card.Rank> ranks;
     private final boolean suitSignificant;
-    private final String name;
+    private final Category category;
+    private final Card.Rank[] vitalRanks;
 
-    Figure(Collection<Card.Rank> ranks, boolean suitSignificant){
+    Figure(Collection<Card.Rank> ranks, boolean suitSignificant, Category category,Card.Rank[] vitalRanks){
         this.ranks = new ArrayList<>(ranks);
         this.suitSignificant = suitSignificant;
-        this.name = createName(ranks,suitSignificant);
+        this.category = category;
+        this.vitalRanks = Arrays.copyOfRange(vitalRanks,0,vitalRanks.length);
     }
 
 
@@ -29,67 +39,29 @@ public class Figure implements Comparable<Figure>{
 
     public boolean isSuitSignificant() { return suitSignificant; }
 
+    private Category getCategory(){return category;}
+
+    private Card.Rank[] getVitalRanks(){ return vitalRanks;}
+
     @Override
     public String toString() {
-        return name;
+        switch(vitalRanks.length){
+            case 0: return this.getCategory().name().toLowerCase();
+            case 1: return this.getCategory().name().toLowerCase()+"("+this.getVitalRanks()[0].name().toLowerCase()+")";
+            default: return this.getCategory().name().toLowerCase()+"("+this.getVitalRanks()[0].name().toLowerCase()+"_"+this.getVitalRanks()[1].name().toLowerCase()+")";
+        }
     }
 
     @Override
     public int compareTo(@NonNull Figure o) {
-
-        Category category1,category2;
-        if(!this.name.equals("flush")) category1 = Category.valueOf(this.name.substring(0,this.name.lastIndexOf("(")).toUpperCase());
-        else category1 = Category.FLUSH;
-        if(!o.name.equals("flush")) category2 = Category.valueOf(o.name.substring(0,o.name.lastIndexOf("(")).toUpperCase());
-        else category2 = Category.FLUSH;
-        if(category1!=category2) return category1.compareTo(category2);
-        if(category1==Category.FLUSH) return 0;
-
-        String ranksList1 = this.name.substring(this.name.indexOf("(")+1,this.name.indexOf(")")).toUpperCase();
-        String ranksList2 = (o).name.substring(o.name.indexOf("(")+1,o.name.indexOf(")")).toUpperCase();
-
-        String[] ranks1 = ranksList1.split("_");
-        String[] ranks2 = ranksList2.split("_");
-
-        Card.Rank r1 = Card.Rank.valueOf(ranks1[0]);
-        Card.Rank r2 = Card.Rank.valueOf(ranks2[0]);
-        if(r1!=r2 || ranks1.length<2) return r1.compareTo(r2);
-        r1 = Card.Rank.valueOf(ranks1[1]);
-        r2 = Card.Rank.valueOf(ranks2[1]);
-        return r1.compareTo(r2);
+        int compare = this.getCategory().getPower().compareTo(o.category.getPower());
+        if(compare!=0) return compare;
+        for(int i=0;i<this.getVitalRanks().length;i++){
+            compare = this.getVitalRanks()[i].getPower().compareTo(o.getVitalRanks()[i].getPower());
+            if(compare!=0) return compare;
+        }
+        return 0;
 
     }
 
-    static private String createName(Collection<Card.Rank> ranks, boolean suitSignificant) {
-
-        List<Card.Rank> ranksList = new ArrayList<>(ranks); Collections.sort(ranksList);
-        Set<Card.Rank> ranksSet = new HashSet<>(ranks);
-
-        if(ranksSet.size()==1){
-            switch(ranksList.size()){
-                case 1: return "high_card("+ranksList.get(0).toString().toLowerCase()+")";
-                case 2: return "one_pair("+ranksList.get(0).toString().toLowerCase()+")";
-                case 3: return "three_of_a_kind("+ranksList.get(0).toString().toLowerCase()+")";
-                case 4: return "four_of_a_kind("+ranksList.get(0).toString().toLowerCase()+")";
-            }
-        }
-
-        if(ranksSet.size()==5 && ranksList.get(0).ordinal()+4==ranksList.get(4).ordinal()){
-            if(suitSignificant) return "straight_flush("+ ranksList.get(4).toString().toLowerCase()+")";
-            else return "straight("+ ranksList.get(4).toString().toLowerCase()+")";
-        }
-
-        //Exception: 5 4 3 2 A
-        if(ranksSet.size()==5 && ranksList.get(4)== Card.Rank.ACE && ranksList.get(3)==Card.Rank.FIVE){
-            return "straight_flush(five)";
-        }
-        if(ranksSet.isEmpty() && suitSignificant){ return "flush"; }
-
-        if(ranksList.size()==4) return "two_pair("+ranksList.get(2).toString().toLowerCase()+"_" +ranksList.get(0).toString().toLowerCase()+")";
-        else{
-            if(ranksList.get(2)==ranksList.get(1))
-                return "full_house("+ranksList.get(2).toString().toLowerCase()+"_"+ranksList.get(3).toString().toLowerCase()+")";
-            else return "full_house("+ranksList.get(2).toString().toLowerCase()+"_"+ranksList.get(1).toString().toLowerCase()+")";
-        }
-    }
 }
