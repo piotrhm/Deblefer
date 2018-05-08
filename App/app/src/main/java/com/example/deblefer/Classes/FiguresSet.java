@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-public class AllFigures {
-    private static Collection<Figure> figures = new HashSet<>();
+public class FiguresSet {
+    private static List<Figure> figuresList = new ArrayList<>();
     static {
 
         //straight flush && straight
@@ -17,26 +17,26 @@ public class AllFigures {
         List<Card.Rank> allRanks = new ArrayList<>(Arrays.asList(Card.Rank.values()));
         Collections.sort(allRanks);
         Card.Rank[] vitalRanks = new Card.Rank[]{Card.Rank.ACE};
-        figures.add(new Figure(ranks,true, Figure.Category.STRAIGHT_FLUSH,vitalRanks));
-        figures.add(new Figure(ranks,false,Figure.Category.STRAIGHT,vitalRanks));
+        figuresList.add(new Figure(ranks,true, Figure.Category.STRAIGHT_FLUSH,vitalRanks));
+        figuresList.add(new Figure(ranks,false,Figure.Category.STRAIGHT,vitalRanks));
 
         while(ranks.get(0)!= Card.Rank.SIX){
             ranks.remove(0);
             vitalRanks = new Card.Rank[]{ranks.get(0)};
             ranks.add(allRanks.get(ranks.get(3).getPower()-3));
-            figures.add(new Figure(ranks,true,Figure.Category.STRAIGHT_FLUSH,vitalRanks));
-            figures.add(new Figure(ranks,false,Figure.Category.STRAIGHT,vitalRanks));
+            figuresList.add(new Figure(ranks,true,Figure.Category.STRAIGHT_FLUSH,vitalRanks));
+            figuresList.add(new Figure(ranks,false,Figure.Category.STRAIGHT,vitalRanks));
         }
         ranks.remove(0);
         vitalRanks = new Card.Rank[]{ranks.get(0)};
         ranks.add(Card.Rank.ACE);
-        figures.add(new Figure(ranks,true,Figure.Category.STRAIGHT_FLUSH,vitalRanks));
-        figures.add(new Figure(ranks,false,Figure.Category.STRAIGHT_FLUSH,vitalRanks));
+        figuresList.add(new Figure(ranks,true,Figure.Category.STRAIGHT_FLUSH,vitalRanks));
+        figuresList.add(new Figure(ranks,false,Figure.Category.STRAIGHT_FLUSH,vitalRanks));
 
         //flush
         ranks.clear();
         vitalRanks = new Card.Rank[0];
-        figures.add(new Figure(ranks,true, Figure.Category.FLUSH,vitalRanks));
+        figuresList.add(new Figure(ranks,true, Figure.Category.FLUSH,vitalRanks));
 
         //full house
         vitalRanks = new Card.Rank[2];
@@ -47,7 +47,7 @@ public class AllFigures {
                 vitalRanks[1] = r2;
                 if(r1==r2) continue;
                 ranks.add(r2); ranks.add(r2);
-                figures.add(new Figure(ranks,false, Figure.Category.FULL_HOUSE,vitalRanks));
+                figuresList.add(new Figure(ranks,false, Figure.Category.FULL_HOUSE,vitalRanks));
                 ranks.remove(4); ranks.remove(3);
             }
             ranks.clear();
@@ -60,17 +60,20 @@ public class AllFigures {
             vitalRanks[0] = r1;
             for(int i=0;i<4;i++){
                 ranks.add(r1);
-                figures.add(new Figure(ranks,false,categories[i],vitalRanks));
+                figuresList.add(new Figure(ranks,false,categories[i],vitalRanks));
             }
             ranks.clear();
         }
 
+        Collections.sort(figuresList);
+
     }
 
-    public static Collection<Figure> getUnmodifableFigures(){ return Collections.unmodifiableCollection(figures); }
+    public static List<Figure> getUnmodifableFigures(){ return Collections.unmodifiableList(figuresList); }
 
-    public static Collection<Figure> getModifableFigures(){
-        return new HashSet<>(figures);
+    public static List<Figure> getModifableFigures(){
+        return new ArrayList<>(figuresList);
     }
 
 }
+

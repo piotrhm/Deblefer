@@ -10,10 +10,10 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-public class AllFiguresTest {
+public class FiguresSetTest {
     @Test
     public void allFiguresTest(){
-        List<Figure> allFiguresList = new ArrayList<>(AllFigures.getUnmodifableFigures());
+        List<Figure> allFiguresList = FiguresSet.getModifableFigures();
         Collections.sort(allFiguresList);
         assertTrue(allFiguresList.size()==229);
         Set<Figure> allFiguresSet = new HashSet<>(allFiguresList);
