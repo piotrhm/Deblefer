@@ -20,22 +20,19 @@ import java.util.stream.Collectors;
 
 public class Deck {
     private static Set<Card> cards = new HashSet<>();
-    private static Map<Face, Card> anticards = new TreeMap<>();
     private static List<Card> listOfCards = new ArrayList<>();
-    private static SparseArray<Integer> cardsImagesId = null;
+    private static Map<Card, Integer> cardsImagesId = null;
 
     static {
-        int id = 1;
         for (Card.Rank rank : Card.Rank.values())
             for (Card.Suit suit : Card.Suit.values())
-                cards.add(new Card(rank, suit, id++));
-
-        for (Card card : cards){
-            anticards.put(card.getMyFace(), card);
-        }
+                cards.add(new Card(rank, suit));
 
         listOfCards.addAll(cards);
         Collections.sort(listOfCards);
+
+        if(!testHashesCode())
+            throw new RuntimeException("Card hashes are bad");
     }
     /*
     * it's likely not to be sorted (#android misteries)
@@ -65,40 +62,38 @@ public class Deck {
     /*
     * moze sie przydac
     * */
-    public static Card getCard(Card.Rank rank, Card.Suit suit){
-        return anticards.get(new Face(rank, suit));
-    }
-
-    public static Card getCard(Face face){
-        return anticards.get(face);
-    }
 
     private static class UninitializedArrayException extends RuntimeException{}
 
     public static int getCardImageId(Card card){
         if(cardsImagesId == null)
             throw new UninitializedArrayException();
-        return cardsImagesId.get(card.getId());
+        return cardsImagesId.get(card);
     }
 
     public static void initializeCardsImagesIds(Context context){
-        cardsImagesId = new SparseArray<>();
+        cardsImagesId = new HashMap<>();
         for (Card card : cards){
             int id = context.getResources().getIdentifier(card.toString(), "drawable", context.getPackageName());
-            cardsImagesId.append(card.getId(), id);
+            cardsImagesId.put(card, id);
         }
 
     }
 
-    public static int getCardId(Card.Rank rank, Card.Suit suit){
-        for (Card card : cards){
-            if(card.getRank() == rank && card.getSuit() == suit)
-                return card.getId();
-        }
-        return 0;
-    }
-
-    public static SparseArray<Integer> getCardsImagesId() {
+    public static Map<Card, Integer> getCardsImagesId() {
         return cardsImagesId;
+    }
+
+    static boolean testHashesCode(){
+        ArrayList<Integer> hashes = new ArrayList<>();
+        for(Card.Rank rank : Card.Rank.values()){
+            for(Card.Suit suit : Card.Suit.values()){
+                Card card = new Card(rank, suit);
+                if(hashes.contains(card.hashCode()))
+                    return false;
+                hashes.add(card.hashCode());
+            }
+        }
+        return true;
     }
 }

@@ -2,10 +2,12 @@ package com.example.deblefer;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.Deck;
@@ -13,28 +15,57 @@ import com.example.deblefer.Classes.Game;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 public class TexasModuleActivity extends AppCompatActivity {
 
-    private List<ImageButton> cardButtons = new ArrayList<>();
     private Collection<Card> deck = Deck.getModifableDeckAsSet();
-    private List<Card> used = new ArrayList<>();
+    private List<Card> table = new ArrayList<>();
+    private List<Card> hand = new ArrayList<>();
 
     private Game game = new Game(2);
+    private List<ImageView> cardImages = new ArrayList<>();
+    private Button addButton = findViewById(R.id.addCardButton);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_texas_module);
-        cardButtons.add((ImageButton) findViewById(R.id.imageButton0));
-        cardButtons.add((ImageButton) findViewById(R.id.imageButton1));
-        cardButtons.add((ImageButton)findViewById(R.id.imageButton2));
-        cardButtons.add((ImageButton)findViewById(R.id.imageButton3));
-        cardButtons.add((ImageButton)findViewById(R.id.imageButton4));
-        cardButtons.add((ImageButton)findViewById(R.id.imageButton5));
-        cardButtons.add((ImageButton)findViewById(R.id.imageButton6));
+        cardImages.add((ImageView) findViewById(R.id.cardImageView0));
+        cardImages.add((ImageView) findViewById(R.id.cardImageView1));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView2));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView3));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView4));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView5));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView6));
+        addButton.setOnClickListener((View v) -> {
+            Card card = getCardFromDialog();
+            if(card == null)
+                return;
+            setViewActive(cardImages.get(getUsedCardCount()), card);
+            deck.remove(card);
+            if(getUsedCardCount() < 2)
+                hand.add(card);
+            else
+                table.add(card);
+            if(getUsedCardCount() == 2){
+                // PREFLOP
+            }
+            else if(getUsedCardCount() == 5){
+                // FLOP
+            }
+            else if(getUsedCardCount() == 6){
+                // TURN
+            }
+            if(getUsedCardCount() == 7){
+                // RIVER
+                addButton.setClickable(false);
+            }
+        });
+    }
+
+    private int getUsedCardCount(){
+        return hand.size() + table.size();
     }
 
     @Override
@@ -59,8 +90,15 @@ public class TexasModuleActivity extends AppCompatActivity {
     }
 
     private Card getCardFromDialog(){
-        return null;
+        return new Card(Card.Rank.DEUCE, Card.Suit.HEARTS);
     }
 
+    private void setViewUnused(ImageView cardView){
+        cardView.setImageResource(R.drawable.unused);
+    }
+
+    private void setViewActive(ImageView cardView, Card card){
+        cardView.setImageResource(Deck.getCardImageId(card));
+    }
 
 }
