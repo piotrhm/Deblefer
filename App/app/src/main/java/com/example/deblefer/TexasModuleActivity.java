@@ -3,6 +3,7 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,6 +13,7 @@ import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.CustomDialog;
 import com.example.deblefer.Classes.Deck;
 import com.example.deblefer.Classes.Game;
+import com.example.deblefer.Classes.HandPower;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,7 +75,8 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView5));
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
         addButton = findViewById(R.id.addCardButton);
-
+        Log.println(Log.ASSERT, "XD", HandPower.initializePowers(this).toString());
+        Log.println(Log.ASSERT, "XD", Integer.toString(HandPower.getPowers().size()));
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

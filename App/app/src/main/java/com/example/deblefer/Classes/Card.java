@@ -14,6 +14,10 @@ public class Card implements Comparable<Card>{
         public Integer getPower() {
             return power;
         }
+
+        public String getSimpleName(){
+            return this.power == 10 ? "T" : power < 11 ? getPower().toString() : name().substring(0, 1);
+        }
     }
 
     public enum Suit { CLUBS(1), DIAMONDS(2), HEARTS(3), SPADES(4);
@@ -27,8 +31,8 @@ public class Card implements Comparable<Card>{
         }
     }
 
-    protected final Card.Rank rank;
-    protected final Card.Suit suit;
+    private final Card.Rank rank;
+    private final Card.Suit suit;
 
     public Rank getRank() { return rank; }
     public Suit getSuit() { return suit; }
@@ -41,7 +45,8 @@ public class Card implements Comparable<Card>{
     public String toString() {
         return rank.toString().toLowerCase()
                 + "_of_"
-                + suit.toString().toLowerCase(); }
+                + suit.toString().toLowerCase();
+    }
 
     @Override
     public boolean equals(Object obj) {

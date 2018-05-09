@@ -1,8 +1,11 @@
 package com.example.deblefer.Classes;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 public class StatisticsGenerator {
     private Collection<Card> hand;
@@ -11,6 +14,9 @@ public class StatisticsGenerator {
     private Collection<SemiStatistics> semiStatistics = new ArrayList<>();
     private Collection<Statistics> fullStatistics = new ArrayList<>();
 
+    public static double getHandPower(List<Card> hand, int playersCount, Context context){
+        return HandPower.getHandPower(hand.get(0), hand.get(1), context);
+    }
 
     private StatisticsGenerator(Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
         this.hand = new ArrayList<>(hand);
@@ -28,6 +34,7 @@ public class StatisticsGenerator {
     private void generateSemiStatistics(){
         // generuje ci szanse na zdobycie danych figur
         // semistatistics to bedzie superklasa statistics ale tylko z polem figure i chanceOfGetting
+
     }
     private void generateFullStatistics(){
         // dogenerowujesz korzystajac byc moze z semiStatistics watosci chanceOfWinningWithFigure
