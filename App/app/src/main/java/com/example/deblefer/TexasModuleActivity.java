@@ -75,15 +75,11 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView5));
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
         addButton = findViewById(R.id.addCardButton);
-        Log.println(Log.ASSERT, "XD", HandPower.initializePowers(this).toString());
-        Log.println(Log.ASSERT, "XD", Integer.toString(HandPower.getPowers().size()));
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
-                AlertDialog alertDialog = dialog.showDialog(1, deck, new onDialogFinishHandler());
-                alertDialog.show();
-            }
+
+        addButton.setOnClickListener(v -> {
+            CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
+            AlertDialog alertDialog = dialog.showDialog(1, deck, new onDialogFinishHandler());
+            alertDialog.show();
         });
     }
 

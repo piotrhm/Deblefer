@@ -27,7 +27,7 @@ public class HandPower {
 
     }
 
-    public static void initializePowers(Context context){
+    private static void initializePowers(Context context){
         if(powers != null)
             return;
         try {
