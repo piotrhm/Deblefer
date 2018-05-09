@@ -31,7 +31,7 @@ public class FiguresSet {
         vitalRanks = new Card.Rank[]{ranks.get(0)};
         ranks.add(Card.Rank.ACE);
         figuresList.add(new Figure(ranks,true,Figure.Category.STRAIGHT_FLUSH,vitalRanks));
-        figuresList.add(new Figure(ranks,false,Figure.Category.STRAIGHT_FLUSH,vitalRanks));
+        figuresList.add(new Figure(ranks,false,Figure.Category.STRAIGHT,vitalRanks));
 
         //flush
         ranks.clear();
@@ -60,6 +60,7 @@ public class FiguresSet {
             vitalRanks[0] = r1;
             for(int i=0;i<4;i++){
                 ranks.add(r1);
+                if(i==0 && r1==Card.Rank.DEUCE) continue;
                 figuresList.add(new Figure(ranks,false,categories[i],vitalRanks));
             }
             ranks.clear();
