@@ -13,7 +13,7 @@ public class StatisticsGenerator {
     private Collection<Card> hand;
     private Collection<Card> table;
     private Collection<Card> unused;
-    private Collection<Statistics> statistics = new ArrayList<>();
+    private List<Statistics> statistics = new ArrayList<>();
 
 
     private StatisticsGenerator(int players, Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
@@ -23,12 +23,12 @@ public class StatisticsGenerator {
         this.unused = new HashSet<>(unused);
     }
 
-    public static Collection<Statistics> getStatistics(int players, Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
+    public static List<Statistics> getStatistics(int players, Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
         StatisticsGenerator generator = new StatisticsGenerator(players, hand, table, unused);
         generator.generateStatistics();
         return generator.statistics;
     }
-    public static Collection<Statistics> getStatistics(Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
+    public static List<Statistics> getStatistics(Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
         return getStatistics(2,hand,table,unused);
     }
 

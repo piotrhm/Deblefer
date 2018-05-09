@@ -63,7 +63,7 @@ public class Deck {
     * moze sie przydac
     * */
 
-    private static class UninitializedArrayException extends RuntimeException{}
+    static class UninitializedArrayException extends RuntimeException{}
 
     public static int getCardImageId(Card card){
         if(cardsImagesId == null)

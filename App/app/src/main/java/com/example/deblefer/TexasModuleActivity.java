@@ -1,21 +1,30 @@
 package com.example.deblefer;
 import android.app.AlertDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 
 import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.CustomDialog;
 import com.example.deblefer.Classes.Deck;
 import com.example.deblefer.Classes.Game;
+import com.example.deblefer.Classes.HandPower;
+import com.example.deblefer.Classes.Statistics;
+import com.example.deblefer.Classes.StatisticsGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TexasModuleActivity extends AppCompatActivity {
 
@@ -26,6 +35,8 @@ public class TexasModuleActivity extends AppCompatActivity {
     private Game game = new Game(2);
     private List<ImageView> cardImages = new ArrayList<>();
     private FloatingActionButton addButton;
+    private ListView statsListView;
+    private ArrayAdapter<String> arrayAdapter;
 
     class onDialogFinishHandler implements CustomDialog.onGetCardDialogFinish{
 
@@ -49,13 +60,13 @@ public class TexasModuleActivity extends AppCompatActivity {
             if (TexasModuleActivity.this.getUsedCardCount() == 2) {
                 // PREFLOP
             } else if (TexasModuleActivity.this.getUsedCardCount() == 5) {
-                // FLOP
+                setStats(StatisticsGenerator.getStatistics(hand, table, deck));
             } else if (TexasModuleActivity.this.getUsedCardCount() == 6) {
-                // TURN
+                setStats(StatisticsGenerator.getStatistics(hand, table, deck));
             }
             if (TexasModuleActivity.this.getUsedCardCount() == 7) {
-                // RIVER
                 addButton.setClickable(false);
+                setStats(StatisticsGenerator.getStatistics(hand, table, deck));
             }
         }
     }
@@ -72,15 +83,13 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView4));
         cardImages.add((ImageView)findViewById(R.id.cardImageView5));
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
+        statsListView = findViewById(R.id.statsListView);
         addButton = findViewById(R.id.addCardButton);
 
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
-                AlertDialog alertDialog = dialog.showDialog(1, deck, new onDialogFinishHandler());
-                alertDialog.show();
-            }
+        addButton.setOnClickListener(v -> {
+            CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
+            AlertDialog alertDialog = dialog.showDialog(1, deck, new onDialogFinishHandler());
+            alertDialog.show();
         });
     }
 
@@ -115,6 +124,17 @@ public class TexasModuleActivity extends AppCompatActivity {
 
     private void setViewActive(ImageView cardView, Card card){
         cardView.setImageResource(Deck.getCardImageId(card));
+    }
+
+    private void setStats(List<Statistics> stats){
+        List<String> statsStrings = new ArrayList<>();
+        Collections.sort(stats);
+        for (Statistics statistics : stats) {
+            String toString = statistics.toString();
+            statsStrings.add(toString);
+        }
+        arrayAdapter = new ArrayAdapter<>(TexasModuleActivity.this, R.layout.simple_row, statsStrings);
+        statsListView.setAdapter(arrayAdapter);
     }
 
 }
