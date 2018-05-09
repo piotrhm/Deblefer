@@ -16,21 +16,13 @@
 
     </android.support.design.widget.AppBarLayout>
 
-<!--    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_dialog_email" />-->
 
     <include
         android:id="@+id/include"
-        android:layout_marginTop="75dp"
-        android:layout_gravity="top"
-        layout="@layout/content_texas_module"
+        layout="@layout/activity_texas_module_constraint"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginTop="75dp" />
 
 </android.support.design.widget.CoordinatorLayout>

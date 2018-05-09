@@ -39,9 +39,9 @@ public class Figure implements Comparable<Figure>{
 
     public boolean isSuitSignificant() { return suitSignificant; }
 
-    private Category getCategory(){return category;}
+    public Category getCategory(){return category;}
 
-    private Card.Rank[] getVitalRanks(){ return vitalRanks;}
+    public Card.Rank[] getVitalRanks(){ return vitalRanks;}
 
     @Override
     public String toString() {
