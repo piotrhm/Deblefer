@@ -32,6 +32,7 @@ public class StatisticsGenerator {
         return getStatistics(2,hand,table,unused);
     }
 
+
     private void generateStatistics(){
 
         Set<Set<Card>> uncheckedCardsCombinations = getAllCombinations(5-table.size(),unused);
@@ -44,19 +45,22 @@ public class StatisticsGenerator {
         List<Figure> sortedFigures = new ArrayList<>(FiguresSet.getUnmodifableFigures());
         Collections.sort(sortedFigures,Collections.reverseOrder());
 
+        int allFigures = 0;
+
         for(int i=0;i<sortedFigures.size();i++){
-            if(uncheckedCardsCombinations.size()==0) break;
+            if(uncheckedCardsCombinations.size()==0 && cardsPlayer.size()<7) break;
             Figure figure = sortedFigures.get(i);
 
             int possibleCombinationsFigure = 0;
-
-            Set<Set<Card>> neededCombinations = neededCombinations(cardsPlayer,figure,unusedCards);
-            if(neededCombinations.isEmpty()) continue;
             int counterLoosing = 0;
+            Set<Set<Card>> neededCombinations = neededCombinations(cardsPlayer,figure,unusedCards);
+
+            if(neededCombinations.isEmpty()) continue;
+
             for(Set<Card> nC : neededCombinations){
 
                 if(!uncheckedCardsCombinations.remove(nC)){ continue; }
-
+                allFigures++;
                 possibleCombinationsFigure++;
                 unusedCards.removeAll(nC);
 
@@ -78,13 +82,13 @@ public class StatisticsGenerator {
             int allPossibilities = choose(players-1,45*22)*possibleCombinationsFigure;
 
             double chanceWinning = ((double)counterLoosing)/allPossibilities;
-            double chanceGetting = ((double)possibleCombinationsFigure)/(possibleCombinationsPlayer);
-            if(chanceWinning==0) continue;
 
+            double chanceGetting = ((double)possibleCombinationsFigure)/(possibleCombinationsPlayer);
+            if(chanceGetting==0) continue;
             statistics.add(new Statistics(figure,chanceGetting,chanceWinning));
         }
-
     }
+
 
     //too slow, too long
     private Set<Set<Card>> neededCombinations(Set<Card> cards, Figure figure, Set<Card> unusedCards) {
@@ -92,7 +96,7 @@ public class StatisticsGenerator {
         if(cards.size()<5 || cards.size()>7 ) throw new IllegalArgumentException(); //cards.size \in {2,5,6,7} but for 2 other method or DB
 
         Set<Set<Card>> neededCombinations = new HashSet<>();
-        if(cards.size()==7) return neededCombinations;
+        if(cards.size()==7){ return neededCombinations; }
 
         if(figure.isSuitSignificant()) {
             ArrayList<ArrayList<Card>> suitedCards = new ArrayList<>(4);
@@ -196,26 +200,39 @@ public class StatisticsGenerator {
 
             for(Card.Rank r : cardsRanks) figureRanks.remove(r);
 
+            if(figureRanks.size()+cards.size()>7) return neededCombinations;
+
             if(figureRanks.size()==0){
                 neededCombinations = getAllCombinations(7-cards.size(),unusedCards);
                 return neededCombinations;
             }
 
             if(figureRanks.size()==1){
-                Set<Card> missingCard1 = getAll(unusedCards);
-                Set<Card> missingCard2 = getAllRanked(unusedCards,figureRanks.get(0));
-                for(Card card1 : missingCard1){
-                    for(Card card2 : missingCard2){
-                        if(card1.equals(card2)) continue;
-                        Set<Card> missingPair = new HashSet<>();
-                        missingPair.add(card1); missingPair.add(card2);
-                        neededCombinations.add(missingPair);
+                if(cards.size()==5){
+                    Set<Card> missingCard1 = getAll(unusedCards);
+                    Set<Card> missingCard2 = getAllRanked(unusedCards,figureRanks.get(0));
+                    for(Card card1 : missingCard1){
+                        for(Card card2 : missingCard2){
+                            if(card1.equals(card2)) continue;
+                            Set<Card> missingPair = new HashSet<>();
+                            missingPair.add(card1); missingPair.add(card2);
+                            neededCombinations.add(missingPair);
+                        }
                     }
+                    return neededCombinations;
                 }
-                return neededCombinations;
+                if(cards.size()==6){
+                    Set<Card> missingCard1 = getAllRanked(unusedCards,figureRanks.get(0));
+                    for(Card card1 : missingCard1){
+                        Set<Card> missing = new HashSet<>();
+                        missing.add(card1);
+                        neededCombinations.add(missing);
+                    }
+                    return neededCombinations;
+                }
             }
 
-            if(figureRanks.size()==2){
+            if(figureRanks.size()==2 && cards.size()==5){
                 Set<Card> missingCard1 = getAllRanked(unusedCards,figureRanks.get(0));
                 Set<Card> missingCard2 = getAllRanked(unusedCards,figureRanks.get(1));
                 for(Card card1 : missingCard1){
@@ -286,6 +303,7 @@ public class StatisticsGenerator {
         }
         return setToReturn;
     }
+
 
     static private int choose(int k,int n){
         int result = 1;

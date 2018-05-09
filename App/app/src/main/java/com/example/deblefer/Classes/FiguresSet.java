@@ -66,8 +66,24 @@ public class FiguresSet {
             ranks.clear();
         }
 
-        Collections.sort(figuresList);
+        //two pair
 
+        ranks.clear();
+        Collections.sort(figuresList);
+        vitalRanks = new Card.Rank[2];
+        for(Card.Rank r1 : Card.Rank.values()){
+            vitalRanks[0]=r1;
+            ranks.add(r1); ranks.add(r1);
+            for(Card.Rank r2 : Card.Rank.values()){
+                if(r2.getPower()>=r1.getPower()) continue;
+                ranks.add(r2); ranks.add(r2);
+                vitalRanks[1]=r2;
+                figuresList.add(new Figure(ranks,false, Figure.Category.TWO_PAIR,vitalRanks));
+                ranks.remove(r2); ranks.remove(r2);
+            }
+            ranks.remove(r1); ranks.remove(r1);
+
+        }
     }
 
     public static List<Figure> getUnmodifableFigures(){ return Collections.unmodifiableList(figuresList); }
