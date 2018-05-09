@@ -15,11 +15,16 @@ public class FiguresSetTest {
     public void allFiguresTest(){
         List<Figure> allFiguresList = FiguresSet.getModifableFigures();
         Collections.sort(allFiguresList);
-        assertTrue(allFiguresList.size()==229);
+        assertTrue(allFiguresList.size()==228);
         Set<Figure> allFiguresSet = new HashSet<>(allFiguresList);
-        assertTrue(allFiguresSet.size()==229);
-        assertEquals(allFiguresList.get(0).toString(),"high_card(deuce)");
-        assertEquals(allFiguresList.get(228).toString(),"straight_flush(ace)");
+        Set<String> allNamesSet = new HashSet<>();
+        for(Figure f : allFiguresList){
+            allNamesSet.add(f.toString());
+        }
+        assertTrue(allFiguresSet.size()==228);
+        assertTrue(allNamesSet.size()==228);
+        assertEquals(allFiguresList.get(0).toString(),"high_card(three)");
+        assertEquals(allFiguresList.get(227).toString(),"straight_flush(ace)");
     }
 
 }
