@@ -1,8 +1,11 @@
 package com.example.deblefer;
+
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,8 +15,11 @@ import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.CustomDialog;
 import com.example.deblefer.Classes.Deck;
 import com.example.deblefer.Classes.Game;
+import com.example.deblefer.Classes.IconAdapter;
+import com.example.deblefer.Classes.IconData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,6 +33,9 @@ public class TexasModuleActivity extends AppCompatActivity {
     private List<ImageView> cardImages = new ArrayList<>();
     private FloatingActionButton addButton;
 
+    private RecyclerView recyclerView;
+    private IconAdapter adapter;
+
     class onDialogFinishHandler implements CustomDialog.onGetCardDialogFinish{
 
         Collection<Card> addedCards = null;
@@ -38,10 +47,14 @@ public class TexasModuleActivity extends AppCompatActivity {
         @Override
         public void run() {
             Card card = addedCards.iterator().next();
+            adapter = new IconAdapter(null);
+
             if (card == null)
                 return;
+
             TexasModuleActivity.this.setViewActive(cardImages.get(TexasModuleActivity.this.getUsedCardCount()), card);
             deck.remove(card);
+
             if (TexasModuleActivity.this.getUsedCardCount() < 2)
                 hand.add(card);
             else
@@ -49,15 +62,17 @@ public class TexasModuleActivity extends AppCompatActivity {
             if (TexasModuleActivity.this.getUsedCardCount() == 2) {
                 // PREFLOP
             } else if (TexasModuleActivity.this.getUsedCardCount() == 5) {
-                // FLOP
+                //FLOP
+                updateStatsView(Arrays.asList(deck.toArray()));
             } else if (TexasModuleActivity.this.getUsedCardCount() == 6) {
                 // TURN
-            }
-            if (TexasModuleActivity.this.getUsedCardCount() == 7) {
+                updateStatsView(Arrays.asList(hand.toArray()));
+            } else if (TexasModuleActivity.this.getUsedCardCount() == 7) {
                 // RIVER
                 addButton.setClickable(false);
             }
         }
+
     }
 
     @Override
@@ -73,6 +88,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView5));
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
         addButton = findViewById(R.id.addCardButton);
+        recyclerView = findViewById(R.id.recyclerView);
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,6 +131,18 @@ public class TexasModuleActivity extends AppCompatActivity {
 
     private void setViewActive(ImageView cardView, Card card){
         cardView.setImageResource(Deck.getCardImageId(card));
+    }
+
+    private void updateStatsView(List<?> listOfStats){
+        IconData[] data = new IconData[listOfStats.size()];
+        for(int i = 0; i < listOfStats.size(); i++) {
+            data[i] = new IconData(listOfStats.get(i).toString(),R.drawable.unused);
+        }
+
+        adapter.updateData(data);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
+        recyclerView.setAdapter(adapter);
     }
 
 }
