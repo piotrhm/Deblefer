@@ -3,38 +3,41 @@ package com.example.deblefer.Classes;
 import android.support.annotation.NonNull;
 
 /*
-* nie nadaje sie do hashowania
-* */
+ * nie nadaje sie do hashowania
+ * */
 public class Statistics implements Comparable<Statistics>{
 
     private Figure figure;
-    private Double chanceOfWinning;
-    private Double chanceOfGetting;
+    private Double chanceToWin;
+    private Double chanceToGet;
+    private Double chanceToDraw;
 
-    public Double getChanceOfGetting() { return chanceOfGetting; }
+    public Double getChanceOfGetting() { return chanceToGet; }
 
-    public Double getChanceOfWinning() { return chanceOfWinning; }
+    public Double getChanceOfWinning() { return chanceToWin; }
 
-    Statistics(Figure figure, double chanceOfGetting, double chanceOfWinning){
+    public Double getChanceOfDraw(){ return chanceToDraw; }
+
+    Statistics(Figure figure, double chanceToGet, double chanceToWin, double chanceToDraw){
         this.figure = figure;
-        this.chanceOfGetting = chanceOfGetting;
-        this.chanceOfWinning = chanceOfWinning;
+        this.chanceToGet = chanceToGet;
+        this.chanceToWin = chanceToWin;
+        this.chanceToDraw = chanceToDraw;
     }
-
-
     @Override
     public String toString() {
-        return figure + " " + chanceOfGetting+ " " + chanceOfWinning;
+        return figure + " " + chanceToGet+ " " + chanceToWin + " " + chanceToDraw;
     }
 
     @Override
     public int compareTo(@NonNull Statistics o) {
-        if(Double.compare(chanceOfWinning*chanceOfGetting, o.chanceOfWinning*chanceOfGetting) == 0){
-            if(Double.compare(chanceOfGetting, o.chanceOfGetting) == 0)
+        if(Double.compare(chanceToWin*chanceToGet, o.chanceToWin*o.chanceToGet) == 0){
+            if(Double.compare(chanceToGet, o.chanceToGet) == 0)
                 return figure.compareTo(o.figure);
-            return Double.compare(chanceOfGetting, o.chanceOfGetting);
+            return Double.compare(chanceToGet, o.chanceToGet);
         }
-        return Double.compare(chanceOfWinning*chanceOfGetting, o.chanceOfWinning*chanceOfGetting);
+        return Double.compare(chanceToWin*chanceToGet, o.chanceToWin*o.chanceToGet);
     }
+
 
 }

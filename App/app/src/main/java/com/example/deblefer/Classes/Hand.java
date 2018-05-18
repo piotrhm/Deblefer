@@ -2,7 +2,11 @@ package com.example.deblefer.Classes;
 
 import android.support.annotation.NonNull;
 
-public class Hand{
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+public class Hand implements Comparable<Hand>{
     private Card card1;
     private Card card2;
     private boolean suitIsDifferent;
@@ -22,7 +26,15 @@ public class Hand{
             suitIsDifferent = true;
     }
 
-    @Override
+    Hand(Card card1, Card card2, boolean suitIsDifferent){
+        this.card1 = card1;
+        this.card2 = card2;
+        this.suitIsDifferent = suitIsDifferent;
+    }
+
+    public Card getCard1(){ return this.card1; }
+    public Card getCard2(){ return this.card2; }
+
     public boolean equals(Object obj) {
         return obj instanceof Hand && obj.hashCode() == hashCode();
     }
@@ -38,4 +50,18 @@ public class Hand{
     public String toString() {
         return card1.getRank().getSimpleName() + card2.getRank().getSimpleName() + (suitIsDifferent ? "s" : "o");
     }
+    @Override
+    public int compareTo(@NonNull Hand o) {
+        if(card1.getRank().equals(o.card1.getRank())){
+            return card2.getRank().getPower().compareTo(o.card2.getRank().getPower());
+        }
+        return card1.getRank().getPower().compareTo(o.card1.getRank().getPower());
+    }
+
+    public Collection<Card> getCards(){
+        Set<Card> set = new HashSet<>();
+        set.add(card1); set.add(card2);
+        return set;
+    }
 }
+

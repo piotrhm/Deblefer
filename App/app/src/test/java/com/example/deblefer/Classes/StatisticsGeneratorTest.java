@@ -13,6 +13,7 @@ import static org.junit.Assert.*;
 public class StatisticsGeneratorTest {
     @Test
     public void statisticsGeneratorTest(){
+        long startTime = System.currentTimeMillis();
         List<Card> unused = new ArrayList<>(Deck.getModifableDeckAsList());
         List<Card> hand = new ArrayList<>();
         List<Card> table = new ArrayList<>();
@@ -27,6 +28,9 @@ public class StatisticsGeneratorTest {
 
 
         List<Statistics> stats = new ArrayList<>(StatisticsGenerator.getStatistics(3,hand,table,unused));
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        System.out.println("Time: "+elapsedTime);
         double one = 0;
         System.out.println();
         System.out.println("STATISTICS:");
