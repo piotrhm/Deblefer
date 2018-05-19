@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Hand implements Comparable<Hand>{
+public class Hand {
     private Card card1;
     private Card card2;
     private boolean suitIsDifferent;
@@ -50,13 +50,7 @@ public class Hand implements Comparable<Hand>{
     public String toString() {
         return card1.getRank().getSimpleName() + card2.getRank().getSimpleName() + (suitIsDifferent ? "s" : "o");
     }
-    @Override
-    public int compareTo(@NonNull Hand o) {
-        if(card1.getRank().equals(o.card1.getRank())){
-            return card2.getRank().getPower().compareTo(o.card2.getRank().getPower());
-        }
-        return card1.getRank().getPower().compareTo(o.card1.getRank().getPower());
-    }
+
 
     public Collection<Card> getCards(){
         Set<Card> set = new HashSet<>();

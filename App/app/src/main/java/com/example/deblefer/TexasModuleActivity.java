@@ -128,7 +128,7 @@ public class TexasModuleActivity extends AppCompatActivity {
 
     private void setStats(List<Statistics> stats){
         List<String> statsStrings = new ArrayList<>();
-        Collections.sort(stats);
+        Collections.sort(stats,Collections.reverseOrder());
         for (Statistics statistics : stats) {
             String toString = statistics.toString();
             statsStrings.add(toString);

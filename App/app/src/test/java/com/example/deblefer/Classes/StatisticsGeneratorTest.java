@@ -4,9 +4,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -23,8 +21,8 @@ public class StatisticsGeneratorTest {
         hand.add(unused.get(unused.size()-50)); unused.remove(unused.size()-50);
         table.add(unused.get(unused.size()-32)); unused.remove(unused.size()-32);
         table.add(unused.get(unused.size()-45)); unused.remove(unused.size()-45);
-        table.add(unused.get(unused.size()-20)); unused.remove(unused.size()-20);
-       // table.add(unused.get(unused.size()-20)); unused.remove(unused.size()-20);
+        table.add(unused.get(unused.size()-14)); unused.remove(unused.size()-14);
+     //   table.add(unused.get(unused.size()-20)); unused.remove(unused.size()-20);
 
 
         List<Statistics> stats = new ArrayList<>(StatisticsGenerator.getStatistics(3,hand,table,unused));
@@ -36,6 +34,7 @@ public class StatisticsGeneratorTest {
         System.out.println("STATISTICS:");
             for(Statistics s : stats){
             System.out.println(s);
+            System.out.println(s.getUsedCards());
             one+=s.getChanceOfGetting();
         }
         System.out.println();

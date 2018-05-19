@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 
-
 public class StatisticsGenerator {
 
     private int players;
@@ -69,6 +68,9 @@ public class StatisticsGenerator {
             int drawAndLooseCombinations = 0;
 
             if(gettingCombinations==0) continue;
+
+            Iterator<Hand> it = neededHandsForPlayer.iterator();
+            Set<Card> oneOfNeededHands = new HashSet<>(it.next().getCards());
 
             for(Hand neededHand : neededHandsForPlayer){
 
@@ -134,7 +136,8 @@ public class StatisticsGenerator {
             double chanceGetting = ((double) gettingCombinations)/allGettingCombinations;
             double chanceOfWinning = ((double)loosingCombinations)/allHandsCombinations;
             double chanceOfDraw = ((double) drawAndLooseCombinations - loosingCombinations)/allHandsCombinations;
-            statistics.add(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw));
+            Collection<Card> usedCards = usedCards(playerFigure,oneOfNeededHands,table,hand);
+            statistics.add(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards));
         }
     }
 
@@ -159,8 +162,14 @@ public class StatisticsGenerator {
             int allHandsCombinations = 0;
             int loosingCombinations = 0;
             int drawAndLooseCombinations = 0;
+            if(gettingCombinations==0) continue;
+
+            Iterator<Card> it = neededCardsForPlayer.iterator();
+            Set<Card> oneOfNeededCards = new HashSet<>();
+            oneOfNeededCards.add(it.next());
 
             for(Card neededCard : neededCardsForPlayer){
+
 
                 playerCards.add(neededCard);
                 unusedCards.remove(neededCard);
@@ -221,10 +230,10 @@ public class StatisticsGenerator {
             }
             //results
             double chanceGetting = ((double) gettingCombinations)/allGettingCombinations;
-            if(chanceGetting==0) continue;
             double chanceOfWinning = ((double)loosingCombinations)/allHandsCombinations;
             double chanceOfDraw = ((double) drawAndLooseCombinations - loosingCombinations)/allHandsCombinations;
-            statistics.add(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw));
+            Collection<Card> usedCards = usedCards(playerFigure,oneOfNeededCards,table,hand);
+            statistics.add(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards));
         }
     }
     private void afterRiver() {
@@ -296,7 +305,8 @@ public class StatisticsGenerator {
         double chanceOfWinning = ((double)loosingCombinations)/allHandsCombinations;
         int drawAndLooseCombinations = choose(loosingHands+drawingHands,players-1);
         double chanceOfDraw = (((double) drawAndLooseCombinations) -loosingCombinations)/allHandsCombinations;
-        statistics.add(new Statistics(playerFigure,1.0,chanceOfWinning,chanceOfDraw));
+        Collection<Card> usedCards = usedCards(playerFigure,new HashSet<>(),table,hand);
+        statistics.add(new Statistics(playerFigure,1.0,chanceOfWinning,chanceOfDraw,usedCards));
 
     }
 
@@ -679,8 +689,69 @@ public class StatisticsGenerator {
                 }
             }
         }
+        
         return -1;
 
+    }
+
+    static private Collection<Card> usedCards(Figure figure,Collection<Card> neededCards,Collection<Card> hand, Collection<Card> table){
+        Set<Card> cardSet = new HashSet<>();
+        List<Card.Rank> ranks =  new ArrayList<>(figure.getRanks());
+        @SuppressWarnings("unchecked")
+        Iterator<Card>[] iterators = new Iterator[]{hand.iterator(),table.iterator(),neededCards.iterator()};
+        int size = ranks.size();
+        if(!figure.isSuitSignificant()){
+            for(Iterator<Card> iterator : iterators) {
+                while (iterator.hasNext()) {
+                    Card card = iterator.next();
+                    if (ranks.contains(card.getRank())) {
+                        cardSet.add(card);
+                        ranks.remove(card.getRank());
+                        if(ranks.size()==size) return cardSet;
+                    }
+                }
+            }
+        }
+        else{
+            int[] countSuit = new int[4];
+            for(Iterator<Card> iterator : iterators) {
+                while (iterator.hasNext()) {
+                    Card card = iterator.next();
+                    countSuit[card.getSuit().getPower()-Card.Suit.values()[0].getPower()]++;
+                }
+            }
+            Card.Suit suit = Card.Suit.CLUBS;
+            for(int i= 0;i<4;i++){
+                if(countSuit[i]>=5){
+                    suit = Card.Suit.values()[i];break;
+                }
+            }
+            if(figure.getCategory()== Figure.Category.FLUSH){
+                List<Card> cardList = new ArrayList<>();
+                for(Iterator<Card> iterator : iterators) {
+                    while (iterator.hasNext()) {
+                        Card card = iterator.next();
+                        if (card.getSuit()==suit) {
+                            cardList.add(card);
+                        }
+                    }
+                }
+                Collections.sort(cardList,Collections.reverseOrder());
+                for(int i=0;i<5;i++) cardSet.add(cardList.get(i));
+                return cardSet;
+            }
+            for(Iterator<Card> iterator : iterators) {
+                while (iterator.hasNext()) {
+                    Card card = iterator.next();
+                    if (card.getSuit()==suit && ranks.contains(card.getRank())) {
+                        cardSet.add(card);
+                        ranks.remove(card.getRank());
+                        if(ranks.size()==size) return cardSet;
+                    }
+                }
+            }
+        }
+        return cardSet;
     }
 
     //Binomial coefficient
