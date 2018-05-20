@@ -1,51 +1,57 @@
 package com.example.deblefer;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.os.Build;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.CustomDialog;
 import com.example.deblefer.Classes.Deck;
 import com.example.deblefer.Classes.Game;
 import com.example.deblefer.Classes.HandPower;
+import com.example.deblefer.Classes.IconData;
+import com.example.deblefer.Classes.StatisticViewAdapter;
 import com.example.deblefer.Classes.Statistics;
 import com.example.deblefer.Classes.StatisticsGenerator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Random;
 
 public class TexasModuleActivity extends AppCompatActivity {
 
     private Collection<Card> deck = Deck.getModifableDeckAsSet();
     private List<Card> table = new ArrayList<>();
     private List<Card> hand = new ArrayList<>();
-
-    private Game game = new Game(2);
     private List<ImageView> cardImages = new ArrayList<>();
-    private FloatingActionButton addButton;
-    private ListView statsListView;
-    private ArrayAdapter<String> arrayAdapter;
+    private int playersCount = 2;
 
-    //private RecyclerView recyclerView;
-    //private IconAdapter adapter;
+    private FloatingActionButton addButton;
+    private RecyclerView recyclerView;
+    private TextView handPowerTextView;
+    private TextView playersCountTextView;
+    private Button addPlayerButton;
+    private Button minusPlayerButton;
+    private Button passButton;
+    private Button randomButton;
 
     class onDialogFinishHandler implements CustomDialog.onGetCardDialogFinish{
-
         Collection<Card> addedCards = null;
+
         @Override
         public void addCards(Collection<Card> addedCards){
             this.addedCards = addedCards;
@@ -54,38 +60,93 @@ public class TexasModuleActivity extends AppCompatActivity {
         @Override
         public void run() {
             Card card = addedCards.iterator().next();
-            //adapter = new IconAdapter(null);
 
             if (card == null)
                 return;
 
-            TexasModuleActivity.this.setViewActive(cardImages.get(TexasModuleActivity.this.getUsedCardCount()), card);
+            TexasModuleActivity.this.setCardViewActive(cardImages.get(TexasModuleActivity.this.getUsedCardCount()), card);
             deck.remove(card);
 
             if (TexasModuleActivity.this.getUsedCardCount() < 2)
                 hand.add(card);
             else
                 table.add(card);
+
             if (TexasModuleActivity.this.getUsedCardCount() == 2) {
-                // PREFLOP
-            } else if (TexasModuleActivity.this.getUsedCardCount() == 5) {
-                setStats(StatisticsGenerator.getStatistics(hand, table, deck));
-            } else if (TexasModuleActivity.this.getUsedCardCount() == 6) {
-                setStats(StatisticsGenerator.getStatistics(hand, table, deck));
+                setHandPower();
             }
+            else if (TexasModuleActivity.this.getUsedCardCount() == 5) {
+                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
+            }
+            else if (TexasModuleActivity.this.getUsedCardCount() == 6) {
+                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
+            }
+
             if (TexasModuleActivity.this.getUsedCardCount() == 7) {
                 addButton.setClickable(false);
-                setStats(StatisticsGenerator.getStatistics(hand, table, deck));
             }
         }
 
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         Deck.initializeCardsImagesIds(this);
-        setContentView(R.layout.activity_texas_module_constraint);
+        initializeViews();
+        initializeListeners();
+        restart();
+    }
+
+    private void initializeListeners(){
+        addButton.setOnClickListener(v -> {
+            CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
+            AlertDialog alertDialog = dialog.showDialog(1, deck, new onDialogFinishHandler());
+            alertDialog.show();
+        });
+        passButton.setOnClickListener(v -> {
+            restart();
+        });
+        addPlayerButton.setOnClickListener(v -> {
+            playersCount++;
+            setPlayersCountTextView();
+        });
+        minusPlayerButton.setOnClickListener(v -> {
+            playersCount--;
+            setPlayersCountTextView();
+        });
+        randomButton.setOnClickListener(v -> {
+            restart();
+            for (int i=0;i<2;i++){
+                Card card = getRandomCard(deck);
+                hand.add(card);
+                deck.remove(card);
+                setCardViewActive(cardImages.get(i), card);
+            }
+
+            for (int i=0;i<3;i++){
+                Card card = getRandomCard(deck);
+                table.add(card);
+                deck.remove(card);
+                setCardViewActive(cardImages.get(i+2), card);
+            }
+
+            setHandPower();
+
+            Log.println(Log.ASSERT, "XD", hand.toString());
+            Log.println(Log.ASSERT, "XD", table.toString());
+            Log.println(Log.ASSERT, "XD", Integer.toString(deck.size()) + " " + deck.toString());
+
+            updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
+
+        });
+    }
+
+    private void initializeViews(){
+
+        setContentView(R.layout.nested_scroll_view);
+
         cardImages.add((ImageView) findViewById(R.id.cardImageView0));
         cardImages.add((ImageView) findViewById(R.id.cardImageView1));
         cardImages.add((ImageView)findViewById(R.id.cardImageView2));
@@ -93,19 +154,77 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView4));
         cardImages.add((ImageView)findViewById(R.id.cardImageView5));
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
-        statsListView = findViewById(R.id.statsListView);
-        addButton = findViewById(R.id.addCardButton);
-        //recyclerView = findViewById(R.id.recyclerView);
 
-        addButton.setOnClickListener(v -> {
-            CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
-            AlertDialog alertDialog = dialog.showDialog(1, deck, new onDialogFinishHandler());
-            alertDialog.show();
-        });
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setNestedScrollingEnabled(false);
+
+        addButton = findViewById(R.id.addCardButton);
+        randomButton = findViewById(R.id.randomButton);
+        passButton = findViewById(R.id.passButton);
+        minusPlayerButton = findViewById(R.id.minusPlayerButton);
+        addPlayerButton = findViewById(R.id.addPlayerButton);
+        playersCountTextView = findViewById(R.id.playersCountTextView);
+        handPowerTextView = findViewById(R.id.handPowerTextView);
+    }
+
+    private void restart(){
+        deck = Deck.getModifableDeckAsSet();
+        table = new ArrayList<>();
+        hand = new ArrayList<>();
+
+        setPlayersCountTextView();
+        handPowerTextView.setVisibility(View.INVISIBLE);
+        updateStatsView(new ArrayList<>());
+
+        for (ImageView cardView : cardImages)
+            setCardViewInactive(cardView);
+    }
+
+    @SuppressLint({"DefaultLocale", "SetTextI18n"})
+    private void setHandPower(){
+        if(hand.size() < 2){
+            handPowerTextView.setVisibility(View.INVISIBLE);
+            return;
+        }
+        Double handPower = HandPower.getHandPower(hand.get(0), hand.get(1), this)*100;
+        handPowerTextView.setVisibility(View.VISIBLE);
+        handPowerTextView.setText("HAND POWER: " + String.format("%.1f", handPower));
     }
 
     private int getUsedCardCount(){
         return hand.size() + table.size();
+    }
+
+    private void setCardViewActive(ImageView cardView, Card card){
+        cardView.setImageResource(Deck.getCardImageId(card));
+    }
+
+    private void setCardViewInactive(ImageView cardView){
+        cardView.setImageResource(R.drawable.unused);
+    }
+
+    private void updateStatsView(List<Statistics> listOfStats){
+        IconData[] data = new IconData[listOfStats.size()];
+        for(int i = 0; i < listOfStats.size(); i++) {
+            data[i] = new IconData(listOfStats.get(i).getUsedCards(),
+                    listOfStats.get(i).getFigure(),
+                    listOfStats.get(i).getChanceOfWinning(),
+                    listOfStats.get(i).getChanceOfGetting());
+        }
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
+        recyclerView.setAdapter(new StatisticViewAdapter(data));
+    }
+
+    private void setPlayersCountTextView(){
+        playersCountTextView.setText("players:\n" + playersCount);
+    }
+
+    private <T> T getRandomCard(Collection<T> from) {
+        Random rnd = new Random();
+        int i = rnd.nextInt(from.size());
+        return new ArrayList<T>(Collections.unmodifiableCollection(from)).get(i);
     }
 
     @Override
@@ -120,32 +239,20 @@ public class TexasModuleActivity extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()){
+            case R.id.multiplayer:
+                Intent intent1 = new Intent(this,Multiplayer.class);
+                this.startActivity(intent1);
+                return true;
+            case R.id.settings:
+                Intent intent3 = new Intent(this,SettingsActivity.class);
+                this.startActivity(intent3);
+                return true;
+            case R.id.exit:
+                finish();
+                return true;
+            default: return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void setViewUnused(ImageView cardView){
-        cardView.setImageResource(R.drawable.unused);
-    }
-
-    private void setViewActive(ImageView cardView, Card card){
-        cardView.setImageResource(Deck.getCardImageId(card));
-    }
-
-    private void setStats(List<Statistics> stats){
-        List<String> statsStrings = new ArrayList<>();
-        Collections.sort(stats,Collections.reverseOrder());
-        for (Statistics statistics : stats) {
-            String toString = statistics.toString();
-            statsStrings.add(toString);
-        }
-        arrayAdapter = new ArrayAdapter<>(TexasModuleActivity.this, R.layout.simple_row, statsStrings);
-        statsListView.setAdapter(arrayAdapter);
     }
 
 }

@@ -5,6 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:id="@+id/minusPlayerButton"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="120dp"
+        android:text="-"
+        app:layout_constraintStart_toEndOf="@+id/randomButton"
+        app:layout_constraintTop_toBottomOf="@+id/cardImageView3" />
+
     <ImageView
         android:id="@+id/cardImageView1"
         android:layout_width="60dp"
@@ -98,7 +107,7 @@
         android:layout_marginLeft="70dp"
         android:layout_marginRight="70dp"
         android:layout_marginStart="70dp"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="24dp"
         android:clickable="true"
         app:backgroundTint="@android:color/darker_gray"
         app:layout_constraintEnd_toEndOf="parent"
@@ -108,17 +117,77 @@
         app:srcCompat="@android:drawable/ic_menu_add"
         tools:srcCompat="@android:drawable/ic_menu_add" />
 
-    <ListView
-        android:id="@+id/statsListView"
-        android:layout_width="278dp"
-        android:layout_height="300dp"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/playersCountTextView"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/passButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Pass"
+        app:layout_constraintBottom_toBottomOf="@+id/randomButton"
+        app:layout_constraintEnd_toEndOf="@+id/cardImageView6"
+        app:layout_constraintTop_toTopOf="@+id/randomButton"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/randomButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Random"
+        app:layout_constraintStart_toStartOf="@+id/cardImageView0"
+        app:layout_constraintTop_toBottomOf="@+id/cardImageView0" />
+
+    <Button
+        android:id="@+id/addPlayerButton"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="120dp"
+        android:text="+"
+        app:layout_constraintEnd_toStartOf="@+id/passButton"
+        app:layout_constraintTop_toBottomOf="@+id/cardImageView6" />
+
+    <TextView
+        android:id="@+id/playersCountTextView"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="120dp"
+        android:text="players: 10"
+        android:textSize="12sp"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toStartOf="@+id/addPlayerButton"
+        app:layout_constraintStart_toEndOf="@+id/minusPlayerButton"
+        app:layout_constraintTop_toBottomOf="@+id/cardImageView4" />
+
+    <TextView
+        android:id="@+id/handPowerTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="HAND POWER: 90%"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardImageView1" />
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
+
 
 </android.support.constraint.ConstraintLayout>

@@ -1,5 +1,7 @@
 package com.example.deblefer.Classes;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +25,10 @@ public class StatisticsGenerator {
         this.hand = new HashSet<>(hand);
         this.table = new HashSet<>(table);
         this.unused = new HashSet<>(unused);
+
+        Log.println(Log.ASSERT, "XD", hand.toString());
+        Log.println(Log.ASSERT, "XD", table.toString());
+        Log.println(Log.ASSERT, "XD", Integer.toString(unused.size()) + " " + unused.toString());
     }
 
     public static List<Statistics> getStatistics(int players, Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
@@ -61,7 +67,6 @@ public class StatisticsGenerator {
             Figure playerFigure = sortedFigures.get(figureIndex);
 
             Set<Hand> neededHandsForPlayer = neededHands(playerCards,playerFigure,allHandsForPlayer);
-
             int gettingCombinations = neededHandsForPlayer.size();
             int allHandsCombinations = 0;
             int loosingCombinations = 0;
@@ -71,7 +76,6 @@ public class StatisticsGenerator {
 
             Iterator<Hand> it = neededHandsForPlayer.iterator();
             Set<Card> oneOfNeededHands = new HashSet<>(it.next().getCards());
-
             for(Hand neededHand : neededHandsForPlayer){
 
                 playerCards.addAll(neededHand.getCards());
@@ -319,7 +323,7 @@ public class StatisticsGenerator {
         if(figure.isSuitSignificant()) {
             List<Set<Card>> suitedCards = new ArrayList<>(4);
             List<List<Card.Rank>> suitedRanks = new ArrayList<>(4);
-            Iterator<Card> iterator = allCards.iterator();
+            Iterator<Card> iterator;
             for (int i = 0; i < 4; i++) {
                 suitedCards.add(new HashSet<>());
                 suitedRanks.add(new ArrayList<>());
@@ -336,6 +340,7 @@ public class StatisticsGenerator {
                 if(figure.getCategory()== Figure.Category.FLUSH){
                     switch(suitedCards.get(i).size()){
                         case 4:
+                            iterator = allCards.iterator();
                             while(iterator.hasNext()){
                                 Card card = iterator.next();
                                 if(card.getSuit()==suit){
@@ -374,7 +379,7 @@ public class StatisticsGenerator {
         else{
             List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
             List<Card.Rank> cardsRanks = new ArrayList<>(getRanks(cards));
-            Iterator<Card> iterator = allCards.iterator();
+            Iterator<Card> iterator;
             for(Card.Rank rank : cardsRanks) figureRanks.remove(rank);
             if(figureRanks.size()>1) return neededCards;
             switch (figureRanks.size()){
@@ -383,6 +388,7 @@ public class StatisticsGenerator {
                     allCards.clear();
                     break;
                 default:
+                    iterator = allCards.iterator();
                     while(iterator.hasNext()){
                         Card card = iterator.next();
                         if(card.getRank()==figureRanks.get(0)){
@@ -399,8 +405,7 @@ public class StatisticsGenerator {
     private Set<Hand> neededHands(Set<Card> cards, Figure figure, Set<Hand> allHands) {
 
         Set<Hand> neededHands = new HashSet<>();
-        Iterator<Hand> iterator = allHands.iterator();
-
+        Iterator<Hand> iterator;
         if(figure.isSuitSignificant()){
 
             ArrayList<Set<Card>> suitedCards = new ArrayList<>(4);
@@ -421,8 +426,8 @@ public class StatisticsGenerator {
                 Card.Suit suit = Card.Suit.values()[i];
                 if(figure.getCategory()== Figure.Category.FLUSH){
                     switch (suitedCards.get(i).size()){
-
                         case 3:
+                            iterator = allHands.iterator();
                             while(iterator.hasNext()) {
                                 Hand Hand = iterator.next();
                                 if (Hand.getCard1().getSuit() == suit && Hand.getCard2().getSuit() == suit) {
@@ -432,6 +437,7 @@ public class StatisticsGenerator {
                             }
                             break;
                         case 4:
+                            iterator = allHands.iterator();
                             while(iterator.hasNext()) {
                                 Hand Hand = iterator.next();
                                 if (Hand.getCard1().getSuit() == suit || Hand.getCard2().getSuit() == suit) {
@@ -458,6 +464,7 @@ public class StatisticsGenerator {
                             break;
                         case 1:
                             Card card = new Card(suitedCardsRanks.get(0),suit);
+                            iterator = allHands.iterator();
                             while(iterator.hasNext()){
                                 Hand Hand = iterator.next();
                                 if(Hand.getCard1().equals(card) || Hand.getCard2().equals(card)){
@@ -489,6 +496,7 @@ public class StatisticsGenerator {
                     allHands.clear();
                     break;
                 case 1:
+                    iterator = allHands.iterator();
                     while(iterator.hasNext()) {
                         Hand Hand = iterator.next();
                         if (Hand.getCard1().getRank()==figureRanks.get(0) || Hand.getCard2().getRank()==figureRanks.get(0)){
@@ -502,6 +510,7 @@ public class StatisticsGenerator {
                     Collections.sort(figureRanks,Collections.reverseOrder());
                     Card.Rank rank1 = figureRanks.get(0);
                     Card.Rank rank2 = figureRanks.get(1);
+                    iterator = allHands.iterator();
                     while(iterator.hasNext()) {
                         Hand Hand = iterator.next();
                         if (Hand.getCard1().getRank()==rank1 && Hand.getCard2().getRank()==rank2){
@@ -534,11 +543,12 @@ public class StatisticsGenerator {
 
             for(int i=0;i<4;i++){
                 if(suitedCards.get(i).size()<3) continue;
-                Iterator<Hand> iterator = allHands.iterator();
+                Iterator<Hand> iterator;
                 Card.Suit suit = Card.Suit.values()[i];
                 if(figure.getCategory()== Figure.Category.FLUSH){
                     switch (suitedCards.get(i).size()){
                         case 3:
+                            iterator = allHands.iterator();
                             while(iterator.hasNext()) {
                                 Hand Hand = iterator.next();
                                 if (Hand.getCard1().getSuit() == suit && Hand.getCard2().getSuit() == suit)
@@ -546,6 +556,7 @@ public class StatisticsGenerator {
                             }
                             break;
                         case 4:
+                            iterator = allHands.iterator();
                             while(iterator.hasNext()) {
                                 Hand Hand = iterator.next();
                                 if (Hand.getCard1().getSuit() == suit || Hand.getCard2().getSuit() == suit)
@@ -569,6 +580,7 @@ public class StatisticsGenerator {
                             break;
                         case 1:
                             Card card = new Card(suitedCardsRanks.get(0),suit);
+                            iterator = allHands.iterator();
                             while(iterator.hasNext()) {
                                 Hand Hand = iterator.next();
                                 if (Hand.getCard1().equals(card) || Hand.getCard2().equals(card))
@@ -589,13 +601,14 @@ public class StatisticsGenerator {
         else{
             List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
             List<Card.Rank> cardsRanks = new ArrayList<>(getRanks(cards));
-            Iterator<Hand> iterator = allHands.iterator();
+            Iterator<Hand> iterator;
             for(Card.Rank rank : cardsRanks) figureRanks.remove(rank);
             switch (figureRanks.size()){
                 case 0:
                     allHands.clear();
                     break;
                 case 1:
+                    iterator = allHands.iterator();
                     while(iterator.hasNext()) {
                         Hand Hand = iterator.next();
                         if (Hand.getCard1().getRank()==figureRanks.get(0) && Hand.getCard2().getRank()==figureRanks.get(0))
@@ -607,6 +620,7 @@ public class StatisticsGenerator {
                     Collections.sort(figureRanks,Collections.reverseOrder());
                     Card.Rank rank1 = figureRanks.get(0);
                     Card.Rank rank2 = figureRanks.get(1);
+                    iterator = allHands.iterator();
                     while(iterator.hasNext()) {
                         Hand Hand = iterator.next();
                         if (Hand.getCard1().getRank()==rank1 && Hand.getCard2().getRank()==rank2)
@@ -697,28 +711,22 @@ public class StatisticsGenerator {
     static private Collection<Card> usedCards(Figure figure,Collection<Card> neededCards,Collection<Card> hand, Collection<Card> table){
         Set<Card> cardSet = new HashSet<>();
         List<Card.Rank> ranks =  new ArrayList<>(figure.getRanks());
-        @SuppressWarnings("unchecked")
-        Iterator<Card>[] iterators = new Iterator[]{hand.iterator(),table.iterator(),neededCards.iterator()};
+        List<Card> list = new ArrayList<>();
+        list.addAll(hand); list.addAll(table); list.addAll(neededCards);
         int size = ranks.size();
         if(!figure.isSuitSignificant()){
-            for(Iterator<Card> iterator : iterators) {
-                while (iterator.hasNext()) {
-                    Card card = iterator.next();
-                    if (ranks.contains(card.getRank())) {
-                        cardSet.add(card);
-                        ranks.remove(card.getRank());
-                        if(ranks.size()==size) return cardSet;
-                    }
+            for(Card card : list) {
+                if (ranks.contains(card.getRank())) {
+                    cardSet.add(card);
+                    ranks.remove(card.getRank());
+                    if(ranks.size()==size) return cardSet;
                 }
             }
         }
         else{
             int[] countSuit = new int[4];
-            for(Iterator<Card> iterator : iterators) {
-                while (iterator.hasNext()) {
-                    Card card = iterator.next();
-                    countSuit[card.getSuit().getPower()-Card.Suit.values()[0].getPower()]++;
-                }
+            for(Card card : list) {
+                countSuit[card.getSuit().getPower()-Card.Suit.values()[0].getPower()]++;
             }
             Card.Suit suit = Card.Suit.CLUBS;
             for(int i= 0;i<4;i++){
@@ -728,27 +736,23 @@ public class StatisticsGenerator {
             }
             if(figure.getCategory()== Figure.Category.FLUSH){
                 List<Card> cardList = new ArrayList<>();
-                for(Iterator<Card> iterator : iterators) {
-                    while (iterator.hasNext()) {
-                        Card card = iterator.next();
-                        if (card.getSuit()==suit) {
-                            cardList.add(card);
-                        }
+
+                for(Card card : list) {
+                    if (card.getSuit()==suit){
+                        cardList.add(card);
                     }
                 }
                 Collections.sort(cardList,Collections.reverseOrder());
                 for(int i=0;i<5;i++) cardSet.add(cardList.get(i));
                 return cardSet;
             }
-            for(Iterator<Card> iterator : iterators) {
-                while (iterator.hasNext()) {
-                    Card card = iterator.next();
-                    if (card.getSuit()==suit && ranks.contains(card.getRank())) {
-                        cardSet.add(card);
-                        ranks.remove(card.getRank());
-                        if(ranks.size()==size) return cardSet;
-                    }
+            for(Card card : list) {
+                if (card.getSuit()==suit && ranks.contains(card.getRank())) {
+                    cardSet.add(card);
+                    ranks.remove(card.getRank());
+                    if(ranks.size()==size) return cardSet;
                 }
+
             }
         }
         return cardSet;
