@@ -1,5 +1,7 @@
 package com.example.deblefer.Classes;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +25,12 @@ public class StatisticsGenerator {
         this.hand = new HashSet<>(hand);
         this.table = new HashSet<>(table);
         this.unused = new HashSet<>(unused);
+        for (Card card : hand)
+            Log.println(Log.ASSERT, "GEN", card.toString());
+
+        for (Card card : table)
+            Log.println(Log.ASSERT, "GEN", card.toString());
+        Log.println(Log.ASSERT, "GEN", Integer.toString(unused.size()));
     }
 
     public static List<Statistics> getStatistics(int players, Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
