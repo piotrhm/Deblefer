@@ -9,11 +9,11 @@ import android.widget.TextView;
 
 import com.example.deblefer.R;
 
-public class IconAdapter extends RecyclerView.Adapter<IconAdapter.ViewHolder> {
+public class StatisticViewAdapter extends RecyclerView.Adapter<StatisticViewAdapter.ViewHolder> {
 
     private IconData[] data;
 
-    public IconAdapter(IconData[] data) {
+    public StatisticViewAdapter(IconData[] data) {
         this.data = data;
     }
 
@@ -32,6 +32,10 @@ public class IconAdapter extends RecyclerView.Adapter<IconAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.textView.setText(data[position].getDescription());
         holder.imageView.setImageResource(data[position].getImgId());
+        holder.imageView2.setImageResource(data[position].getImgId());
+        holder.imageView3.setImageResource(data[position].getImgId());
+        holder.imageView4.setImageResource(data[position].getImgId());
+        holder.imageView5.setImageResource(data[position].getImgId());
     }
     @Override
     public int getItemCount() {
@@ -40,10 +44,18 @@ public class IconAdapter extends RecyclerView.Adapter<IconAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView imageView;
+        public ImageView imageView2;
+        public ImageView imageView3;
+        public ImageView imageView4;
+        public ImageView imageView5;
         public TextView textView;
         public ViewHolder(View itemView) {
             super(itemView);
             this.imageView = (ImageView) itemView.findViewById(R.id.imageView);
+            this.imageView2 = (ImageView) itemView.findViewById(R.id.imageView2);
+            this.imageView3 = (ImageView) itemView.findViewById(R.id.imageView3);
+            this.imageView4 = (ImageView) itemView.findViewById(R.id.imageView4);
+            this.imageView5 = (ImageView) itemView.findViewById(R.id.imageView5);
             this.textView = (TextView) itemView.findViewById(R.id.textView);
         }
     }
