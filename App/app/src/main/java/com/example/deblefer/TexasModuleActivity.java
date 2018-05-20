@@ -40,8 +40,8 @@ public class TexasModuleActivity extends AppCompatActivity {
     private ListView statsListView;
     private ArrayAdapter<String> arrayAdapter;
 
-    private RecyclerView recyclerView;
-    private IconAdapter adapter;
+    //private RecyclerView recyclerView;
+    //private IconAdapter adapter;
 
     class onDialogFinishHandler implements CustomDialog.onGetCardDialogFinish{
 
@@ -54,7 +54,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         @Override
         public void run() {
             Card card = addedCards.iterator().next();
-            adapter = new IconAdapter(null);
+            //adapter = new IconAdapter(null);
 
             if (card == null)
                 return;
@@ -95,7 +95,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
         statsListView = findViewById(R.id.statsListView);
         addButton = findViewById(R.id.addCardButton);
-        recyclerView = findViewById(R.id.recyclerView);
+        //recyclerView = findViewById(R.id.recyclerView);
 
         addButton.setOnClickListener(v -> {
             CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
