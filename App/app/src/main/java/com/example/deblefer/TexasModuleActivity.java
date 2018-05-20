@@ -1,4 +1,5 @@
 package com.example.deblefer;
+
 import android.app.AlertDialog;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import com.example.deblefer.Classes.Statistics;
 import com.example.deblefer.Classes.StatisticsGenerator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +40,9 @@ public class TexasModuleActivity extends AppCompatActivity {
     private ListView statsListView;
     private ArrayAdapter<String> arrayAdapter;
 
+    private RecyclerView recyclerView;
+    private IconAdapter adapter;
+
     class onDialogFinishHandler implements CustomDialog.onGetCardDialogFinish{
 
         Collection<Card> addedCards = null;
@@ -49,10 +54,14 @@ public class TexasModuleActivity extends AppCompatActivity {
         @Override
         public void run() {
             Card card = addedCards.iterator().next();
+            adapter = new IconAdapter(null);
+
             if (card == null)
                 return;
+
             TexasModuleActivity.this.setViewActive(cardImages.get(TexasModuleActivity.this.getUsedCardCount()), card);
             deck.remove(card);
+
             if (TexasModuleActivity.this.getUsedCardCount() < 2)
                 hand.add(card);
             else
@@ -69,6 +78,7 @@ public class TexasModuleActivity extends AppCompatActivity {
                 setStats(StatisticsGenerator.getStatistics(hand, table, deck));
             }
         }
+
     }
 
     @Override
@@ -85,6 +95,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
         statsListView = findViewById(R.id.statsListView);
         addButton = findViewById(R.id.addCardButton);
+        recyclerView = findViewById(R.id.recyclerView);
 
         addButton.setOnClickListener(v -> {
             CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
