@@ -8,9 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 
 import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.CustomDialog;
@@ -34,8 +32,6 @@ public class TexasModuleActivity extends AppCompatActivity {
     private Game game = new Game(2);
     private List<ImageView> cardImages = new ArrayList<>();
     private FloatingActionButton addButton;
-    private ListView statsListView;
-    private ArrayAdapter<String> arrayAdapter;
 
     private RecyclerView recyclerView;
     private StatisticViewAdapter adapter;
@@ -135,7 +131,10 @@ public class TexasModuleActivity extends AppCompatActivity {
     private void updateStatsView(List<Statistics> listOfStats){
         IconData[] data = new IconData[listOfStats.size()];
         for(int i = 0; i < listOfStats.size(); i++) {
-            //data[i] = new IconData(listOfStats.get(i).toString(),R.drawable.unused);
+            data[i] = new IconData(listOfStats.get(i).getUsedCards(),
+                    listOfStats.get(i).getFigure(),
+                    listOfStats.get(i).getChanceOfWinning(),
+                    listOfStats.get(i).getChanceOfGetting());
         }
 
         adapter.updateData(data);

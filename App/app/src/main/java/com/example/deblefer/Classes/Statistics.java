@@ -30,6 +30,11 @@ public class Statistics implements Comparable<Statistics>{
         this.chanceToDraw = chanceToDraw;
         this.usedCards = usedCards;
     }
+
+    public Figure getFigure() {
+        return figure;
+    }
+
     @Override
     public String toString() {
         return figure + " " + chanceToGet+ " " + chanceToWin + " " + chanceToDraw ;
