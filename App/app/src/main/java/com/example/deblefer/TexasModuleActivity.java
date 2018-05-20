@@ -19,6 +19,7 @@ import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.CustomDialog;
 import com.example.deblefer.Classes.Deck;
 import com.example.deblefer.Classes.Game;
+import com.example.deblefer.Classes.HandPower;
 import com.example.deblefer.Classes.IconData;
 import com.example.deblefer.Classes.StatisticViewAdapter;
 import com.example.deblefer.Classes.Statistics;
@@ -36,13 +37,11 @@ public class TexasModuleActivity extends AppCompatActivity {
     private Collection<Card> deck = Deck.getModifableDeckAsSet();
     private List<Card> table = new ArrayList<>();
     private List<Card> hand = new ArrayList<>();
-    private Game game = new Game(2);
     private List<ImageView> cardImages = new ArrayList<>();
     private int playersCount = 2;
 
     private FloatingActionButton addButton;
     private RecyclerView recyclerView;
-    private StatisticViewAdapter adapter;
     private TextView handPowerTextView;
     private TextView playersCountTextView;
     private Button addPlayerButton;
@@ -61,7 +60,6 @@ public class TexasModuleActivity extends AppCompatActivity {
         @Override
         public void run() {
             Card card = addedCards.iterator().next();
-            adapter = new StatisticViewAdapter(null);
 
             if (card == null)
                 return;
@@ -75,17 +73,17 @@ public class TexasModuleActivity extends AppCompatActivity {
                 table.add(card);
 
             if (TexasModuleActivity.this.getUsedCardCount() == 2) {
-                // PREFLOP
-            } else if (TexasModuleActivity.this.getUsedCardCount() == 5) {
-                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
-                //setStats(StatisticsGenerator.getStatistics(hand, table, deck));
-            } else if (TexasModuleActivity.this.getUsedCardCount() == 6) {
-                //updateStatsView(Arrays.asList(deck.toArray()));
-                //setStats(StatisticsGenerator.getStatistics(hand, table, deck));
+                setHandPower();
             }
+            else if (TexasModuleActivity.this.getUsedCardCount() == 5) {
+                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
+            }
+            else if (TexasModuleActivity.this.getUsedCardCount() == 6) {
+                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
+            }
+
             if (TexasModuleActivity.this.getUsedCardCount() == 7) {
                 addButton.setClickable(false);
-                //setStats(StatisticsGenerator.getStatistics(hand, table, deck));
             }
         }
 
@@ -93,47 +91,31 @@ public class TexasModuleActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         Deck.initializeCardsImagesIds(this);
-        setContentView(R.layout.nested_scroll_view);
-        cardImages.add((ImageView) findViewById(R.id.cardImageView0));
-        cardImages.add((ImageView) findViewById(R.id.cardImageView1));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView2));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView3));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView4));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView5));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView6));
-        addButton = findViewById(R.id.addCardButton);
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setNestedScrollingEnabled(false);
-        randomButton = findViewById(R.id.randomButton);
-        passButton = findViewById(R.id.passButton);
-        minusPlayerButton = findViewById(R.id.minusPlayerButton);
-        addPlayerButton = findViewById(R.id.addPlayerButton);
-        playersCountTextView = findViewById(R.id.playersCountTextView);
-        handPowerTextView = findViewById(R.id.handPowerTextView);
+        initializeViews();
+        initializeListeners();
+        restart();
+    }
 
+    private void initializeListeners(){
         addButton.setOnClickListener(v -> {
             CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
             AlertDialog alertDialog = dialog.showDialog(1, deck, new onDialogFinishHandler());
             alertDialog.show();
         });
-
         passButton.setOnClickListener(v -> {
             restart();
         });
-
         addPlayerButton.setOnClickListener(v -> {
             playersCount++;
             setPlayersCountTextView();
         });
-
         minusPlayerButton.setOnClickListener(v -> {
             playersCount--;
             setPlayersCountTextView();
         });
-
         randomButton.setOnClickListener(v -> {
             restart();
             for (int i=0;i<2;i++){
@@ -150,19 +132,37 @@ public class TexasModuleActivity extends AppCompatActivity {
                 setCardViewActive(cardImages.get(i+2), card);
             }
 
-            for (Card card : hand)
-                Log.println(Log.ASSERT, "XD", card.toString());
+            setHandPower();
 
-            for (Card card : table)
-                Log.println(Log.ASSERT, "XD", card.toString());
-            Log.println(Log.ASSERT, "XD", Integer.toString(deck.size()));
-
+            Log.println(Log.ASSERT, "XD", hand.toString());
+            Log.println(Log.ASSERT, "XD", table.toString());
+            Log.println(Log.ASSERT, "XD", Integer.toString(deck.size()) + " " + deck.toString());
 
             updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
 
         });
+    }
 
-        restart();
+    private void initializeViews(){
+        setContentView(R.layout.nested_scroll_view);
+        cardImages.add((ImageView) findViewById(R.id.cardImageView0));
+        cardImages.add((ImageView) findViewById(R.id.cardImageView1));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView2));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView3));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView4));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView5));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView6));
+
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setNestedScrollingEnabled(false);
+
+        addButton = findViewById(R.id.addCardButton);
+        randomButton = findViewById(R.id.randomButton);
+        passButton = findViewById(R.id.passButton);
+        minusPlayerButton = findViewById(R.id.minusPlayerButton);
+        addPlayerButton = findViewById(R.id.addPlayerButton);
+        playersCountTextView = findViewById(R.id.playersCountTextView);
+        handPowerTextView = findViewById(R.id.handPowerTextView);
     }
 
     private void restart(){
@@ -170,15 +170,59 @@ public class TexasModuleActivity extends AppCompatActivity {
         table = new ArrayList<>();
         hand = new ArrayList<>();
 
+        setPlayersCountTextView();
         handPowerTextView.setVisibility(View.INVISIBLE);
+        updateStatsView(new ArrayList<>());
+
         for (ImageView cardView : cardImages)
             setCardViewInactive(cardView);
+    }
 
-//        updateStatsView(new ArrayList<>());
+    @SuppressLint({"DefaultLocale", "SetTextI18n"})
+    private void setHandPower(){
+        if(hand.size() < 2){
+            handPowerTextView.setVisibility(View.INVISIBLE);
+            return;
+        }
+        Double handPower = HandPower.getHandPower(hand.get(0), hand.get(1), this)*100;
+        handPowerTextView.setVisibility(View.VISIBLE);
+        handPowerTextView.setText("HAND POWER: " + String.format("%.1f", handPower));
     }
 
     private int getUsedCardCount(){
         return hand.size() + table.size();
+    }
+
+    private void setCardViewActive(ImageView cardView, Card card){
+        cardView.setImageResource(Deck.getCardImageId(card));
+    }
+
+    private void setCardViewInactive(ImageView cardView){
+        cardView.setImageResource(R.drawable.unused);
+    }
+
+    private void updateStatsView(List<Statistics> listOfStats){
+        IconData[] data = new IconData[listOfStats.size()];
+        for(int i = 0; i < listOfStats.size(); i++) {
+            data[i] = new IconData(listOfStats.get(i).getUsedCards(),
+                    listOfStats.get(i).getFigure(),
+                    listOfStats.get(i).getChanceOfWinning(),
+                    listOfStats.get(i).getChanceOfGetting());
+        }
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
+        recyclerView.setAdapter(new StatisticViewAdapter(data));
+    }
+
+    private void setPlayersCountTextView(){
+        playersCountTextView.setText("players:\n" + playersCount);
+    }
+
+    private <T> T getRandomCard(Collection<T> from) {
+        Random rnd = new Random();
+        int i = rnd.nextInt(from.size());
+        return new ArrayList<T>(Collections.unmodifiableCollection(from)).get(i);
     }
 
     @Override
@@ -200,43 +244,6 @@ public class TexasModuleActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void setCardViewActive(ImageView cardView, Card card){
-        cardView.setImageResource(Deck.getCardImageId(card));
-    }
-
-    private void setCardViewInactive(ImageView cardView){
-        cardView.setImageResource(R.drawable.unused);
-    }
-
-    private void updateStatsView(List<Statistics> listOfStats){
-        Log.println(Log.ASSERT, "XD", listOfStats.toString());
-
-        if(listOfStats.size() == 0) {
-            recyclerView.setAdapter(null);
-            return;
-        }
-
-        IconData[] data = new IconData[listOfStats.size()];
-        for(int i = 0; i < listOfStats.size(); i++) {
-            data[i] = new IconData(listOfStats.get(i).toString(),R.drawable.unused);
-        }
-
-        adapter.updateData(data);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
-        recyclerView.setAdapter(adapter);
-    }
-
-    private void setPlayersCountTextView(){
-        playersCountTextView.setText("players:" + playersCount);
-    }
-
-    private <T> T getRandomCard(Collection<T> from) {
-        Random rnd = new Random();
-        int i = rnd.nextInt(from.size());
-        return new ArrayList<T>(Collections.unmodifiableCollection(from)).get(i);
     }
 
 }

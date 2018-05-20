@@ -20,6 +20,23 @@ public class Figure implements Comparable<Figure>{
         public Integer getPower() {
             return power;
         }
+
+
+        @Override
+        public String toString() {
+            switch (this){
+                case HIGH_CARD: return "HIGH CARD";
+                case ONE_PAIR: return "ONE PAIR";
+                case TWO_PAIR: return "TWO PAIR";
+                case THREE_OF_A_KIND: return "THREE OF A KIND";
+                case STRAIGHT: return "STRAIGHT";
+                case FLUSH: return "FLUSH";
+                case FULL_HOUSE: return "FULL HOUSE";
+                case FOUR_OF_A_KIND: return "FOUR OF A KIND";
+                case STRAIGHT_FLUSH: return "STRAIGHT FLUSH";
+            }
+            return null;
+        }
     }
 
     private final Collection<Card.Rank> ranks;

@@ -17,10 +17,6 @@ public class StatisticViewAdapter extends RecyclerView.Adapter<StatisticViewAdap
         this.data = data;
     }
 
-    public void updateData(IconData[] data) {
-        this.data = data;
-    }
-
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
@@ -30,12 +26,14 @@ public class StatisticViewAdapter extends RecyclerView.Adapter<StatisticViewAdap
     }
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.textView.setText(data[position].getDescription());
+        holder.textView.setText(data[position].getFigure());
+        holder.textView2.setText(data[position].getStat1());
+        holder.textView3.setText(data[position].getStat2());
         holder.imageView.setImageResource(data[position].getImgId());
-        holder.imageView2.setImageResource(data[position].getImgId());
-        holder.imageView3.setImageResource(data[position].getImgId());
-        holder.imageView4.setImageResource(data[position].getImgId());
-        holder.imageView5.setImageResource(data[position].getImgId());
+        holder.imageView2.setImageResource(data[position].getImgId2());
+        holder.imageView3.setImageResource(data[position].getImgId3());
+        holder.imageView4.setImageResource(data[position].getImgId4());
+        holder.imageView5.setImageResource(data[position].getImgId5());
     }
     @Override
     public int getItemCount() {
@@ -49,6 +47,9 @@ public class StatisticViewAdapter extends RecyclerView.Adapter<StatisticViewAdap
         public ImageView imageView4;
         public ImageView imageView5;
         public TextView textView;
+        public TextView textView2;
+        public TextView textView3;
+
         public ViewHolder(View itemView) {
             super(itemView);
             this.imageView = (ImageView) itemView.findViewById(R.id.imageView);
@@ -57,6 +58,8 @@ public class StatisticViewAdapter extends RecyclerView.Adapter<StatisticViewAdap
             this.imageView4 = (ImageView) itemView.findViewById(R.id.imageView4);
             this.imageView5 = (ImageView) itemView.findViewById(R.id.imageView5);
             this.textView = (TextView) itemView.findViewById(R.id.textView);
+            this.textView2 = (TextView) itemView.findViewById(R.id.textView2);
+            this.textView3 = (TextView) itemView.findViewById(R.id.textView3);
         }
     }
 
