@@ -1,14 +1,13 @@
 package com.example.deblefer;
 
 import android.app.AlertDialog;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -17,16 +16,14 @@ import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.CustomDialog;
 import com.example.deblefer.Classes.Deck;
 import com.example.deblefer.Classes.Game;
-import com.example.deblefer.Classes.HandPower;
+import com.example.deblefer.Classes.IconData;
+import com.example.deblefer.Classes.StatisticViewAdapter;
 import com.example.deblefer.Classes.Statistics;
 import com.example.deblefer.Classes.StatisticsGenerator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TexasModuleActivity extends AppCompatActivity {
 
@@ -40,8 +37,8 @@ public class TexasModuleActivity extends AppCompatActivity {
     private ListView statsListView;
     private ArrayAdapter<String> arrayAdapter;
 
-    //private RecyclerView recyclerView;
-    //private IconAdapter adapter;
+    private RecyclerView recyclerView;
+    private StatisticViewAdapter adapter;
 
     class onDialogFinishHandler implements CustomDialog.onGetCardDialogFinish{
 
@@ -54,7 +51,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         @Override
         public void run() {
             Card card = addedCards.iterator().next();
-            //adapter = new IconAdapter(null);
+            adapter = new StatisticViewAdapter(null);
 
             if (card == null)
                 return;
@@ -69,13 +66,15 @@ public class TexasModuleActivity extends AppCompatActivity {
             if (TexasModuleActivity.this.getUsedCardCount() == 2) {
                 // PREFLOP
             } else if (TexasModuleActivity.this.getUsedCardCount() == 5) {
-                setStats(StatisticsGenerator.getStatistics(hand, table, deck));
+                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
+                //setStats(StatisticsGenerator.getStatistics(hand, table, deck));
             } else if (TexasModuleActivity.this.getUsedCardCount() == 6) {
-                setStats(StatisticsGenerator.getStatistics(hand, table, deck));
+                //updateStatsView(Arrays.asList(deck.toArray()));
+                //setStats(StatisticsGenerator.getStatistics(hand, table, deck));
             }
             if (TexasModuleActivity.this.getUsedCardCount() == 7) {
                 addButton.setClickable(false);
-                setStats(StatisticsGenerator.getStatistics(hand, table, deck));
+                //setStats(StatisticsGenerator.getStatistics(hand, table, deck));
             }
         }
 
@@ -93,9 +92,9 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView4));
         cardImages.add((ImageView)findViewById(R.id.cardImageView5));
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
-        statsListView = findViewById(R.id.statsListView);
+        //statsListView = findViewById(R.id.statsListView);
         addButton = findViewById(R.id.addCardButton);
-        //recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerView);
 
         addButton.setOnClickListener(v -> {
             CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
@@ -129,23 +128,20 @@ public class TexasModuleActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setViewUnused(ImageView cardView){
-        cardView.setImageResource(R.drawable.unused);
-    }
-
     private void setViewActive(ImageView cardView, Card card){
         cardView.setImageResource(Deck.getCardImageId(card));
     }
 
-    private void setStats(List<Statistics> stats){
-        List<String> statsStrings = new ArrayList<>();
-        Collections.sort(stats,Collections.reverseOrder());
-        for (Statistics statistics : stats) {
-            String toString = statistics.toString();
-            statsStrings.add(toString);
+    private void updateStatsView(List<Statistics> listOfStats){
+        IconData[] data = new IconData[listOfStats.size()];
+        for(int i = 0; i < listOfStats.size(); i++) {
+            //data[i] = new IconData(listOfStats.get(i).toString(),R.drawable.unused);
         }
-        arrayAdapter = new ArrayAdapter<>(TexasModuleActivity.this, R.layout.simple_row, statsStrings);
-        statsListView.setAdapter(arrayAdapter);
+
+        adapter.updateData(data);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
+        recyclerView.setAdapter(adapter);
     }
 
 }
