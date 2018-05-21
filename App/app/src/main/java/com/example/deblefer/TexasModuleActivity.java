@@ -3,7 +3,9 @@ package com.example.deblefer;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,6 +27,7 @@ import com.example.deblefer.Classes.IconData;
 import com.example.deblefer.Classes.StatisticViewAdapter;
 import com.example.deblefer.Classes.Statistics;
 import com.example.deblefer.Classes.StatisticsGenerator;
+import com.example.deblefer.Classes.StatisticsSettings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,6 +62,12 @@ public class TexasModuleActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(TexasModuleActivity.this);
+            boolean draws = prefs.getBoolean("pref_drawsCheckBox", false);
+            double minChanceOfGetting = ((double)Integer.valueOf(prefs.getString("pref_chanceOfGetting_limit","5")))/100;
+            StatisticsSettings statisticsSettings = new StatisticsSettings(minChanceOfGetting,draws);
+
             Card card = addedCards.iterator().next();
 
             if (card == null)
@@ -76,10 +85,10 @@ public class TexasModuleActivity extends AppCompatActivity {
                 setHandPower();
             }
             else if (TexasModuleActivity.this.getUsedCardCount() == 5) {
-                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
+                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck,statisticsSettings));
             }
             else if (TexasModuleActivity.this.getUsedCardCount() == 6) {
-                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
+                updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck,statisticsSettings));
             }
 
             if (TexasModuleActivity.this.getUsedCardCount() == 7) {
@@ -138,7 +147,12 @@ public class TexasModuleActivity extends AppCompatActivity {
             Log.println(Log.ASSERT, "XD", table.toString());
             Log.println(Log.ASSERT, "XD", Integer.toString(deck.size()) + " " + deck.toString());
 
-            updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck));
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean draws = prefs.getBoolean("pref_drawsCheckBox", false);
+            double minChanceOfGetting = ((double)Integer.valueOf(prefs.getString("pref_chanceOfGetting_limit","5")))/100;
+            StatisticsSettings statisticsSettings = new StatisticsSettings(minChanceOfGetting,draws);
+
+            updateStatsView(StatisticsGenerator.getStatistics(hand, table, deck,statisticsSettings ));
 
         });
     }

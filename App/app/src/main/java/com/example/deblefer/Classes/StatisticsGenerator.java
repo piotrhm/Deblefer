@@ -18,28 +18,29 @@ public class StatisticsGenerator {
     private Collection<Card> table;
     private Collection<Card> unused;
     private List<Statistics> statistics = new ArrayList<>();
+    private StatisticsSettings statisticsSettings;
 
-
-    private StatisticsGenerator(int players, Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
+    private StatisticsGenerator(int players, Collection<Card> hand, Collection<Card> table, Collection<Card> unused, StatisticsSettings statisticsSettings){
         this.players = players;
         this.hand = new HashSet<>(hand);
         this.table = new HashSet<>(table);
         this.unused = new HashSet<>(unused);
+        this.statisticsSettings=statisticsSettings;
 
         Log.println(Log.ASSERT, "XD", hand.toString());
         Log.println(Log.ASSERT, "XD", table.toString());
         Log.println(Log.ASSERT, "XD", Integer.toString(unused.size()) + " " + unused.toString());
     }
 
-    public static List<Statistics> getStatistics(int players, Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
-        StatisticsGenerator generator = new StatisticsGenerator(players, hand, table, unused);
+    public static List<Statistics> getStatistics(int players, Collection<Card> hand, Collection<Card> table, Collection<Card> unused,StatisticsSettings statisticsSettings){
+        StatisticsGenerator generator = new StatisticsGenerator(players, hand, table, unused,statisticsSettings);
         generator.generateStatistics();
         return generator.statistics;
     }
-    public static List<Statistics> getStatistics(Collection<Card> hand, Collection<Card> table, Collection<Card> unused){
-        return getStatistics(2,hand,table,unused);
-    }
 
+    public static List<Statistics> getStatistics(Collection<Card> hand, Collection<Card> table, Collection<Card> unused,StatisticsSettings statisticsSettings){
+        return getStatistics(2,hand,table,unused,statisticsSettings);
+    }
 
     private void generateStatistics(){
         switch (table.size()){
@@ -51,8 +52,9 @@ public class StatisticsGenerator {
     }
 
     private void beforeFlop() {
-        //previously generated statistics for every Hand
+        //previously generated statistics for every Pair
     }
+
     private void afterFlop() {
         Set<Card> playerCards = new HashSet<>(hand); playerCards.addAll(table);
         Set<Card> unusedCards = new HashSet<>(unused);
@@ -60,91 +62,137 @@ public class StatisticsGenerator {
         List<Figure> sortedFigures = new ArrayList<>(FiguresSet.getUnmodifableFigures());
         Collections.sort(sortedFigures,Collections.reverseOrder());
 
-        Set<Hand> allHandsForPlayer = new HashSet<>(handGenerator(unusedCards));
-        int allGettingCombinations = allHandsForPlayer.size();
+        Set<Pair> allPairsForPlayer = new HashSet<>(PairGenerator(unusedCards));
+        long allGettingCombinations = allPairsForPlayer.size();
 
-        for(int figureIndex = 0 ;figureIndex<sortedFigures.size() && !allHandsForPlayer.isEmpty();figureIndex++){
+        for(int figureIndex = 0 ;figureIndex<sortedFigures.size() && !allPairsForPlayer.isEmpty();figureIndex++){
             Figure playerFigure = sortedFigures.get(figureIndex);
 
-            Set<Hand> neededHandsForPlayer = neededHands(playerCards,playerFigure,allHandsForPlayer);
-            int gettingCombinations = neededHandsForPlayer.size();
-            int allHandsCombinations = 0;
-            int loosingCombinations = 0;
-            int drawAndLooseCombinations = 0;
+            if( statisticsSettings.isDrawWhenSameFigure()){
+                List<Card> handList = new ArrayList<>(hand);
+                if(playerFigure.getCategory()!= Figure.Category.FLUSH){
+                    if( !playerFigure.getRanks().contains(handList.get(0).getRank())
+                            && !playerFigure.getRanks().contains(handList.get(1).getRank())){
+                        neededPairsRemove(playerCards,playerFigure,allPairsForPlayer);
+                        continue;
+                    }
+                }
+                if(playerFigure.isSuitSignificant()) {
+                    List<Card> suited = new ArrayList<>(hand); suited.addAll(table);
+                    suited = suitedCards(suited);
+                    if(suited.size() < 3) continue;
+                    Card.Suit suit = suited.get(0).getSuit();
+                    if (handList.get(0).getSuit() != suit && handList.get(1).getSuit() != suit ) {
+                        neededPairsRemove(playerCards, playerFigure, allPairsForPlayer);
+                        continue;
+                    }
+                }
+            }
 
-            if(gettingCombinations==0) continue;
+            Set<Pair> neededPairsForPlayer = neededPairs(playerCards,playerFigure,allPairsForPlayer);
 
-            Iterator<Hand> it = neededHandsForPlayer.iterator();
-            Set<Card> oneOfNeededHands = new HashSet<>(it.next().getCards());
-            for(Hand neededHand : neededHandsForPlayer){
+            long gettingCombinations = neededPairsForPlayer.size();
+            long allPairsCombinations = 0;
+            long loosingCombinations = 0;
+            long drawAndLooseCombinations = 0;
+            double chanceGetting = ((double) gettingCombinations)/allGettingCombinations;
 
-                playerCards.addAll(neededHand.getCards());
+            if(chanceGetting==0 || chanceGetting<statisticsSettings.getMinChanceOfGetting()) continue;
 
-                unusedCards.removeAll(neededHand.getCards());
-                Set<Hand> allHandsForOpponent = new HashSet<>(handGenerator(unusedCards));
-                unusedCards.addAll(neededHand.getCards());
-                allHandsCombinations += choose(allHandsForOpponent.size(),players-1);
+            //for usedCards
+            Iterator<Pair> it = neededPairsForPlayer.iterator();
+            Set<Card> oneOfNeededPairs = new HashSet<>(it.next().getCards());
+
+            for(Pair neededPair : neededPairsForPlayer){
+
+                playerCards.addAll(neededPair.getCards());
+                unusedCards.removeAll(neededPair.getCards());
+                Set<Pair> allPairsForOpponent = new HashSet<>(PairGenerator(unusedCards));
+                unusedCards.addAll(neededPair.getCards());
+                allPairsCombinations += choose(allPairsForOpponent.size(),players - 1);
 
                 //wins
-                for(int i = figureIndex-1; i>=0 && !allHandsForOpponent.isEmpty();i--){
+                int start = figureIndex - 1;
+                if(statisticsSettings.isDrawWhenSameFigure()){
+                    start=figureIndex;
+                }
+                for(int i = 0 ; i<=start && !allPairsForOpponent.isEmpty() ; i++){
                     Figure opponentFigure =sortedFigures.get(i);
                     Set<Card> opponentCards = new HashSet<>(table);
-                    opponentCards.addAll(neededHand.getCards());
-                    neededHandsRemove(opponentCards,opponentFigure,allHandsForOpponent);
+                    opponentCards.addAll(neededPair.getCards());
+                    neededPairsRemove(opponentCards,opponentFigure,allPairsForOpponent);
                 }
 
                 //draws
-                int draws = 0;
-                int loosingAfterDraw = 0;
-                Set<Card> opponentCards = new HashSet<>(table); opponentCards.addAll(neededHand.getCards());
-                Set<Hand> neededHands = neededHands(opponentCards,playerFigure,allHandsForOpponent);
-                if(playerFigure.getRanks().size()<5){
+                long loosingAfterDraw = 0;
+                long drawingPairs = 0;
 
-                    List<Card.Rank> drawPlayer = new ArrayList<>(getRanks(playerCards));
-                    for(Card.Rank rank : playerFigure.getRanks()) drawPlayer.remove(rank);
-                    Collections.sort(drawPlayer,Collections.reverseOrder());
-
-                    for(Hand Hand : neededHands){
-                        List<Card.Rank> drawOpponent = new ArrayList<>(getRanks(table));
-                        drawOpponent.addAll(getRanks(Hand.getCards())); drawOpponent.addAll(getRanks(neededHand.getCards()));
-                        for(Card.Rank rank : playerFigure.getRanks()) drawOpponent.remove(rank);
-                        Collections.sort(drawOpponent,Collections.reverseOrder());
-
-                        if(playerFigure.getCategory()== Figure.Category.FLUSH){
-                            int result = flushResult(playerCards,opponentCards);
-                            if(result<0) loosingAfterDraw++;
-                            continue;
-                        }
-
-                        int cardNumber = 0;
-                        for(;cardNumber<5-playerFigure.getRanks().size();cardNumber++){
-                            if(!drawPlayer.get(cardNumber).equals(drawOpponent.get(cardNumber))){
-                                if(drawPlayer.get(cardNumber).getPower()>drawOpponent.get(cardNumber).getPower()){
-                                    loosingAfterDraw++;
-                                }
-                                break;
-                            }
-                        }
-                        if(cardNumber==5-playerFigure.getRanks().size()) draws++;
+                //FLUSH exception
+                if(playerFigure.getCategory()== Figure.Category.FLUSH){
+                    Set<Card> opponentCards = new HashSet<>(table);
+                    opponentCards.addAll(neededPair.getCards());
+                    Set<Pair> neededPairs = neededPairs(opponentCards, playerFigure, allPairsForOpponent);
+                    for (Pair pair : neededPairs) {
+                        opponentCards.addAll(pair.getCards());
+                        int result = flushResult(playerCards, opponentCards);
+                        if (result < 0) loosingAfterDraw++;
+                        if(result==0) drawingPairs++;
+                        opponentCards.removeAll(pair.getCards());
                     }
                 }
-                else draws = neededHands.size();
+
+                else{
+                    if(!statisticsSettings.isDrawWhenSameFigure()){
+
+                        Set<Card> opponentCards = new HashSet<>(table);
+                        opponentCards.addAll(neededPair.getCards());
+                        Set<Pair> neededPairs = neededPairs(opponentCards, playerFigure, allPairsForOpponent);
+
+                        if (playerFigure.getRanks().size() < 5) {
+                            List<Card.Rank> drawPlayer = new ArrayList<>(getRanks(playerCards));
+                            for (Card.Rank rank : playerFigure.getRanks()) drawPlayer.remove(rank);
+                            Collections.sort(drawPlayer, Collections.reverseOrder());
+
+                            for (Pair pair : neededPairs) {
+
+                                List<Card.Rank> drawOpponent = new ArrayList<>(getRanks(opponentCards));
+                                drawOpponent.addAll(getRanks(pair.getCards()));
+                                for (Card.Rank rank : playerFigure.getRanks()) drawOpponent.remove(rank);
+                                Collections.sort(drawOpponent, Collections.reverseOrder());
+
+                                int cardNumber = 0;
+                                for (; cardNumber < 5 - playerFigure.getRanks().size(); cardNumber++) {
+                                    if (!drawPlayer.get(cardNumber).equals(drawOpponent.get(cardNumber))) {
+                                        if (drawPlayer.get(cardNumber).getPower() > drawOpponent.get(cardNumber).getPower()) {
+                                            loosingAfterDraw++;
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (cardNumber == 5 - playerFigure.getRanks().size()) drawingPairs++;
+
+                                drawOpponent.removeAll(getRanks(pair.getCards()));
+
+                            }
+
+                        }
+                        else drawingPairs = neededPairs.size();
+                    }
+                }
+
                 //counting combinations
-                int loosingHands = allHandsForOpponent.size()+loosingAfterDraw;
-                int drawingHands = draws;
-                loosingCombinations += choose(loosingHands,players-1);
-                drawAndLooseCombinations += choose(loosingHands+drawingHands,players-1);
-                playerCards.removeAll(neededHand.getCards());
+                long loosingPairs = allPairsForOpponent.size()+loosingAfterDraw;
+                loosingCombinations += choose(loosingPairs,players - 1);
+                drawAndLooseCombinations += choose(loosingPairs+drawingPairs,players - 1);
+                playerCards.removeAll(neededPair.getCards());
             }
             //results
-            double chanceGetting = ((double) gettingCombinations)/allGettingCombinations;
-            double chanceOfWinning = ((double)loosingCombinations)/allHandsCombinations;
-            double chanceOfDraw = ((double) drawAndLooseCombinations - loosingCombinations)/allHandsCombinations;
-            Collection<Card> usedCards = usedCards(playerFigure,oneOfNeededHands,table,hand);
+            double chanceOfWinning = ((double)loosingCombinations)/allPairsCombinations;
+            double chanceOfDraw = ((double) drawAndLooseCombinations - loosingCombinations)/allPairsCombinations;
+            Collection<Card> usedCards = usedCards(playerFigure,oneOfNeededPairs,table,hand);
             statistics.add(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards));
         }
     }
-
 
     private void afterTurn() {
 
@@ -155,93 +203,125 @@ public class StatisticsGenerator {
         Collections.sort(sortedFigures,Collections.reverseOrder());
 
         Set<Card> allCardsForPlayer = new HashSet<>(unusedCards);
-        int allGettingCombinations = allCardsForPlayer.size();
+        long allGettingCombinations = allCardsForPlayer.size();
 
         for(int figureIndex=0;figureIndex<sortedFigures.size() && !allCardsForPlayer.isEmpty();figureIndex++){
 
             Figure playerFigure = sortedFigures.get(figureIndex);
+
+            if(statisticsSettings.isDrawWhenSameFigure() ){
+                List<Card> handList = new ArrayList<>(hand);
+                if(playerFigure.getCategory()!= Figure.Category.FLUSH){
+                    if((!playerFigure.getRanks().contains(handList.get(0).getRank())
+                            && !playerFigure.getRanks().contains(handList.get(1).getRank()))){
+                        neededCards(playerFigure,playerCards,allCardsForPlayer);
+                        continue;
+                    }}
+                if(playerFigure.isSuitSignificant()) {
+                    List<Card> suited = new ArrayList<>(hand);
+                    suited.addAll(table);
+                    suited = suitedCards(suited);
+                    if(suited.size() < 4) continue;
+                    Card.Suit suit = suited.get(0).getSuit();
+                    if (handList.get(0).getSuit() != suit && handList.get(1).getSuit() != suit){
+                        neededCards(playerFigure,playerCards,allCardsForPlayer);
+                        continue;
+                    }
+                }
+            }
+
             Set<Card> neededCardsForPlayer = neededCards(playerFigure,playerCards,allCardsForPlayer);
 
-            int gettingCombinations = neededCardsForPlayer.size();
-            int allHandsCombinations = 0;
-            int loosingCombinations = 0;
-            int drawAndLooseCombinations = 0;
-            if(gettingCombinations==0) continue;
+            long gettingCombinations = neededCardsForPlayer.size();
+            long allPairsCombinations = 0;
+            long loosingCombinations = 0;
+            long drawAndLooseCombinations = 0;
+            double chanceGetting = ((double) gettingCombinations)/allGettingCombinations;
+
+            if(chanceGetting==0 || chanceGetting<statisticsSettings.getMinChanceOfGetting()) continue;
 
             Iterator<Card> it = neededCardsForPlayer.iterator();
             Set<Card> oneOfNeededCards = new HashSet<>();
             oneOfNeededCards.add(it.next());
 
             for(Card neededCard : neededCardsForPlayer){
-
-
                 playerCards.add(neededCard);
                 unusedCards.remove(neededCard);
-                Set<Hand> allHandsForOpponent = handGenerator(unusedCards);
+                Set<Pair> allPairsForOpponent = PairGenerator(unusedCards);
                 unusedCards.add(neededCard);
-                allHandsCombinations += choose(allHandsForOpponent.size(),players-1);
+                allPairsCombinations += choose(allPairsForOpponent.size(),players - 1);
 
                 //wins
-                for(int i = 0; i<figureIndex && !allHandsForOpponent.isEmpty();i++){
+                for(int i = 0; i<figureIndex && !allPairsForOpponent.isEmpty();i++){
                     Figure opponentFigure =sortedFigures.get(i);
                     Set<Card> opponentCards = new HashSet<>(table);
                     opponentCards.add(neededCard);
-                    neededHandsRemove(opponentCards,opponentFigure,allHandsForOpponent);
+                    neededPairsRemove(opponentCards,opponentFigure,allPairsForOpponent);
                 }
 
                 //draws
                 Set<Card> opponentCards = new HashSet<>(table); opponentCards.add(neededCard);
-                Set<Hand> neededHands = neededHands(opponentCards,playerFigure,allHandsForOpponent);
-                int draws = 0;
-                int loosingAfterDraw = 0;
+                Set<Pair> neededPairs = neededPairs(opponentCards,playerFigure,allPairsForOpponent);
+                long loosingAfterDraw = 0;
+                long drawingPairs = 0;
 
-                if(sortedFigures.get(figureIndex).getRanks().size()<5){
-
-                    List<Card.Rank> drawPlayer = new ArrayList<>(getRanks(playerCards));
-                    for(Card.Rank rank : playerFigure.getRanks()) drawPlayer.remove(rank);
-                    Collections.sort(drawPlayer,Collections.reverseOrder());
-
-                    for(Hand Hand : neededHands){
-                        List<Card.Rank> drawOpponent = new ArrayList<>(getRanks(table));
-                        drawOpponent.add(Hand.getCard1().getRank()); drawOpponent.add(Hand.getCard2().getRank());
-                        drawOpponent.add(neededCard.getRank());
-                        if(playerFigure.getCategory()== Figure.Category.FLUSH){
-                            int result = flushResult(playerCards,opponentCards);
-                            if(result<0) loosingAfterDraw++;
-                            continue;
-                        }
-                        for(Card.Rank rank : playerFigure.getRanks()) drawOpponent.remove(rank);
-                        Collections.sort(drawOpponent,Collections.reverseOrder());
-                        int cardNumber = 0;
-                        for(;cardNumber<5-playerFigure.getRanks().size();cardNumber++){
-                            if(!drawPlayer.get(cardNumber).equals(drawOpponent.get(cardNumber))){
-                                if(drawPlayer.get(cardNumber).getPower()>drawOpponent.get(cardNumber).getPower()){
-                                    loosingAfterDraw++;
-                                }
-                                break;
-                            }
-                        }
-                        if(cardNumber==5-playerFigure.getRanks().size()) draws++;
+                //FLUSH exeception
+                if(playerFigure.getCategory()== Figure.Category.FLUSH){
+                    for (Pair pair : neededPairs) {
+                        opponentCards.addAll(pair.getCards());
+                        int result = flushResult(playerCards, opponentCards);
+                        if (result < 0) loosingAfterDraw++;
+                        if(result == 0) drawingPairs++;
+                        opponentCards.removeAll(pair.getCards());
                     }
                 }
-                else draws = neededHands.size();
+                else{
+                    if(statisticsSettings.isDrawWhenSameFigure()) {
+                        if (sortedFigures.get(figureIndex).getRanks().size() < 5) {
+
+                            List<Card.Rank> drawPlayer = new ArrayList<>(getRanks(playerCards));
+                            for (Card.Rank rank : playerFigure.getRanks()) drawPlayer.remove(rank);
+                            Collections.sort(drawPlayer, Collections.reverseOrder());
+
+                            for (Pair pair : neededPairs) {
+
+                                List<Card.Rank> drawOpponent = new ArrayList<>(getRanks(table));
+                                drawOpponent.add(neededCard.getRank());
+                                drawOpponent.addAll(getRanks(pair.getCards()));
+                                for (Card.Rank rank : playerFigure.getRanks()) drawOpponent.remove(rank);
+                                Collections.sort(drawOpponent, Collections.reverseOrder());
+
+                                int cardNumber = 0;
+                                for (; cardNumber < 5 - playerFigure.getRanks().size(); cardNumber++) {
+                                    if (!drawPlayer.get(cardNumber).equals(drawOpponent.get(cardNumber))) {
+                                        if (drawPlayer.get(cardNumber).getPower() > drawOpponent.get(cardNumber).getPower()) {
+                                            loosingAfterDraw++;
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (cardNumber == 5 - playerFigure.getRanks().size()) drawingPairs++;
+
+                                drawOpponent.removeAll(getRanks(pair.getCards()));
+
+                            }
+                        } else drawingPairs = neededPairs.size();
+                    }}
                 //counting combinations
-                int loosingHands = allHandsForOpponent.size() + loosingAfterDraw;
-                int drawingHands = draws;
-                loosingCombinations += choose(loosingHands,players-1);
-                drawAndLooseCombinations += choose(loosingHands+drawingHands,players-1);
+                long loosingPairs = allPairsForOpponent.size() + loosingAfterDraw;
+                loosingCombinations += choose(loosingPairs,players - 1);
+                drawAndLooseCombinations += choose(loosingPairs+drawingPairs,players - 1);
                 playerCards.remove(neededCard);
             }
             //results
-            double chanceGetting = ((double) gettingCombinations)/allGettingCombinations;
-            double chanceOfWinning = ((double)loosingCombinations)/allHandsCombinations;
-            double chanceOfDraw = ((double) drawAndLooseCombinations - loosingCombinations)/allHandsCombinations;
+            double chanceOfWinning = ((double)loosingCombinations)/allPairsCombinations;
+            double chanceOfDraw = ((double) drawAndLooseCombinations - loosingCombinations)/allPairsCombinations;
             Collection<Card> usedCards = usedCards(playerFigure,oneOfNeededCards,table,hand);
             statistics.add(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards));
         }
     }
-    private void afterRiver() {
 
+    private void afterRiver() {
 
         Set<Card> playerCards = new HashSet<>(hand); playerCards.addAll(table);
 
@@ -256,412 +336,454 @@ public class StatisticsGenerator {
         if(figureIndex==sortedFigures.size()) throw new RuntimeException();
         Figure playerFigure = sortedFigures.get(figureIndex);
 
-        Set<Hand> allHandsForOpponent = handGenerator(unused);
+        if(statisticsSettings.isDrawWhenSameFigure() ){
+            List<Card> handList = new ArrayList<>(hand);
+            if(playerFigure.getCategory()!= Figure.Category.FLUSH) {
+                if (!playerFigure.getRanks().contains(handList.get(0).getRank())
+                        && !playerFigure.getRanks().contains(handList.get(1).getRank())) {
+                    return;
+                }
+            }
+            if(playerFigure.isSuitSignificant()) {
+                List<Card> suited = new ArrayList<>(hand); suited.addAll(table);
+                suited = suitedCards(suited);
+                if(suited.size() < 5) return;
+                Card.Suit suit = suited.get(0).getSuit();
+                if (handList.get(0).getSuit() != suit
+                        && handList.get(1).getSuit() != suit) {
+                    return;
+                }
+            }
+        }
 
-        int allHandsCombinations = choose(allHandsForOpponent.size(),players-1);
+        Set<Pair> allPairsForOpponent = PairGenerator(unused);
+        long allPairsCombinations = choose(allPairsForOpponent.size(),players - 1);
 
         //wins
-        for(int i = 0; i<figureIndex && !allHandsForOpponent.isEmpty();i++){
+        for(int i = 0; i<figureIndex && !allPairsForOpponent.isEmpty();i++){
             Figure opponentFigure = sortedFigures.get(i);
             Set<Card> opponentCards = new HashSet<>(table);
-            neededHandsRemove(opponentCards,opponentFigure,allHandsForOpponent);
+            neededPairsRemove(opponentCards,opponentFigure,allPairsForOpponent);
         }
 
         //draws
         Set<Card> opponentCards = new HashSet<>(table);
-        Set<Hand> neededHands = neededHands(opponentCards,playerFigure,allHandsForOpponent);
-        int draws = 0;
-        int loosingAfterDraw = 0;
+        Set<Pair> neededPairs = neededPairs(opponentCards,playerFigure,allPairsForOpponent);
+        long draws = 0;
+        long loosingAfterDraw = 0;
 
-
-        if(sortedFigures.get(figureIndex).getRanks().size()<5){
-            List<Card.Rank> drawPlayer = new ArrayList<>(getRanks(playerCards));
-            for(Card.Rank rank : playerFigure.getRanks()) drawPlayer.remove(rank);
-            Collections.sort(drawPlayer,Collections.reverseOrder());
-            for(Hand drawHand : neededHands){
-                List<Card.Rank> drawOpponent = new ArrayList<>(getRanks(table));
-                drawOpponent.addAll(getRanks(drawHand.getCards()));
-                if(playerFigure.getCategory()== Figure.Category.FLUSH){
-                    int result = flushResult(playerCards,opponentCards);
-                    if(result<0) loosingAfterDraw++;
-                    continue;
-                }
-                for(Card.Rank rank : playerFigure.getRanks()) drawOpponent.remove(rank);
-                Collections.sort(drawOpponent,Collections.reverseOrder());
-                int cardNumber = 0;
-                for(;cardNumber<5-playerFigure.getRanks().size();cardNumber++){
-                    if(!drawPlayer.get(cardNumber).equals(drawOpponent.get(cardNumber))){
-                        if(drawPlayer.get(cardNumber).getPower()>drawOpponent.get(cardNumber).getPower()){
-                            loosingAfterDraw++;
-                        }
-                        break;
-                    }
-                }
-                if(cardNumber==5-playerFigure.getRanks().size())  draws++;
+        //FLUSH exception
+        if(playerFigure.getCategory()== Figure.Category.FLUSH){
+            for (Pair pair : neededPairs) {
+                opponentCards.addAll(pair.getCards());
+                int result = flushResult(playerCards, opponentCards);
+                if (result < 0) loosingAfterDraw++;
+                if(result == 0) draws++;
+                opponentCards.removeAll(pair.getCards());
             }
         }
-        else draws = neededHands.size();
+        else{
+            if(statisticsSettings.isDrawWhenSameFigure()) {
+                if (sortedFigures.get(figureIndex).getRanks().size() < 5) {
+                    List<Card.Rank> drawPlayer = new ArrayList<>(getRanks(playerCards));
+                    for (Card.Rank rank : playerFigure.getRanks()) drawPlayer.remove(rank);
+                    Collections.sort(drawPlayer, Collections.reverseOrder());
 
+                    for (Pair drawPair : neededPairs) {
+                        List<Card.Rank> drawOpponent = new ArrayList<>(getRanks(table));
+                        drawOpponent.addAll(getRanks(drawPair.getCards()));
+                        for (Card.Rank rank : playerFigure.getRanks()) drawOpponent.remove(rank);
+                        Collections.sort(drawOpponent, Collections.reverseOrder());
+                        int cardNumber = 0;
+                        for (; cardNumber < 5 - playerFigure.getRanks().size(); cardNumber++) {
+                            if (drawPlayer.get(cardNumber)!=drawOpponent.get(cardNumber)) {
+                                if (drawPlayer.get(cardNumber).getPower() > drawOpponent.get(cardNumber).getPower()) {
+                                    loosingAfterDraw++;
+                                }
+                                break;
+                            }
+                        }
+                        if (cardNumber == 5 - playerFigure.getRanks().size()) draws++;
+                        drawOpponent.removeAll(getRanks(drawPair.getCards()));
+                    }
+                }
+                else draws = neededPairs.size();
+            }
+        }
         //results
-        int loosingHands = allHandsForOpponent.size()+loosingAfterDraw;
-        int drawingHands  = draws;
-        int loosingCombinations = choose(loosingHands,players-1);
-        double chanceOfWinning = ((double)loosingCombinations)/allHandsCombinations;
-        int drawAndLooseCombinations = choose(loosingHands+drawingHands,players-1);
-        double chanceOfDraw = (((double) drawAndLooseCombinations) -loosingCombinations)/allHandsCombinations;
+        long loosingPairs = allPairsForOpponent.size()+loosingAfterDraw;
+        long drawingPairs  = draws;
+        long loosingCombinations = choose(loosingPairs,players-1);
+        double chanceOfWinning = ((double)loosingCombinations)/allPairsCombinations;
+        long drawAndLooseCombinations = choose(loosingPairs+drawingPairs,players-1);
+        double chanceOfDraw = (((double) drawAndLooseCombinations) -loosingCombinations)/allPairsCombinations;
         Collection<Card> usedCards = usedCards(playerFigure,new HashSet<>(),table,hand);
         statistics.add(new Statistics(playerFigure,1.0,chanceOfWinning,chanceOfDraw,usedCards));
-
     }
-
 
     //Removes card from allCards when card+cards form figure. Returns removed cards
     private Set<Card> neededCards(Figure figure, Set<Card> cards, Set<Card> allCards) {
-
-        Set<Card> neededCards = new HashSet<>();
-
+        Set<Card> toReturn = new HashSet<>();
         if(figure.isSuitSignificant()) {
-            List<Set<Card>> suitedCards = new ArrayList<>(4);
-            List<List<Card.Rank>> suitedRanks = new ArrayList<>(4);
-            Iterator<Card> iterator;
-            for (int i = 0; i < 4; i++) {
-                suitedCards.add(new HashSet<>());
-                suitedRanks.add(new ArrayList<>());
-            }
-
-            for (Card card : cards) {
-                suitedCards.get(card.getSuit().getPower() - Card.Suit.values()[0].getPower()).add(card);
-                suitedRanks.get(card.getSuit().getPower() - Card.Suit.values()[0].getPower()).add(card.getRank());
-            }
-
-            for(int i=0; i<4; i++){
-                if(suitedCards.get(i).size()<4) continue;
-                Card.Suit suit = Card.Suit.values()[i];
-                if(figure.getCategory()== Figure.Category.FLUSH){
-                    switch(suitedCards.get(i).size()){
-                        case 4:
-                            iterator = allCards.iterator();
-                            while(iterator.hasNext()){
-                                Card card = iterator.next();
+            List<Card> suitedCards = suitedCards(cards);
+            Card.Suit suit = suitedCards.get(0).getSuit();
+            if(figure.getCategory()== Figure.Category.FLUSH){
+                if(suitedCards.size()<4) return toReturn;
+                switch(suitedCards.size()){
+                    case 4:
+                        if(allCards.size()>26){
+                            for(Card.Rank rank : Card.Rank.values()){
+                                Card card = new Card(rank,suit);
+                                if(allCards.remove(card)) toReturn.add(card);
+                            }
+                        }
+                        else{
+                            Iterator<Card> it4 = allCards.iterator();
+                            while(it4.hasNext()){
+                                Card card = it4.next();
                                 if(card.getSuit()==suit){
-                                    neededCards.add(card);
-                                    iterator.remove();
+                                    it4.remove();
+                                    toReturn.add(card);
                                 }
                             }
-                            break;
-                        default:
-                            neededCards.addAll(allCards);
-                            allCards.clear();
-                            return neededCards;
-                    }
+                        }
+                        return toReturn;
+                    default:
+                        toReturn = new HashSet<>(allCards);
+                        allCards.clear();
+                        return toReturn;
                 }
-                else{
-                    List<Card.Rank> suitedFigureRanks = new ArrayList<>(figure.getRanks());
-                    List<Card.Rank> suitedCardsRanks = new ArrayList<>(getRanks(suitedCards.get(i)));
-                    for(Card.Rank rank : suitedCardsRanks) suitedFigureRanks.remove(rank);
-                    if(suitedFigureRanks.size()>1) continue;
-                    switch (suitedFigureRanks.size()){
-                        case 1:
-                            Card card = new Card(suitedFigureRanks.get(0),suit);
-                            if(!allCards.contains(card)) break;
-                            neededCards.add(card);
-                            allCards.remove(card);
-                            break;
-                        case 0:
-                            neededCards.addAll(allCards);
-                            allCards.clear();
-                    }
-                }
-                return neededCards;
             }
-            return neededCards;
+            else{
+                List<Card.Rank> suitedFigureRanks = new ArrayList<>(figure.getRanks());
+                List<Card.Rank> suitedCardsRanks = new ArrayList<>(getRanks(suitedCards));
+                for(Card.Rank rank : suitedCardsRanks) suitedFigureRanks.remove(rank);
+                if(suitedFigureRanks.size()>1) return toReturn;
+                switch (suitedFigureRanks.size()){
+                    case 1:
+                        Card card = new Card(suitedFigureRanks.get(0),suit);
+                        if(allCards.remove(card)) toReturn.add(card);
+                        return toReturn;
+                    case 0:
+                        toReturn = new HashSet<>(allCards);
+                        allCards.clear();
+                        return toReturn;
+                }
+            }
         }
         else{
             List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
             List<Card.Rank> cardsRanks = new ArrayList<>(getRanks(cards));
-            Iterator<Card> iterator;
             for(Card.Rank rank : cardsRanks) figureRanks.remove(rank);
-            if(figureRanks.size()>1) return neededCards;
+            if(figureRanks.size()>1) return toReturn;
             switch (figureRanks.size()){
                 case 0:
-                    neededCards.addAll(allCards);
+                    toReturn = new HashSet<>(allCards);
                     allCards.clear();
-                    break;
+                    return toReturn;
                 default:
-                    iterator = allCards.iterator();
-                    while(iterator.hasNext()){
-                        Card card = iterator.next();
-                        if(card.getRank()==figureRanks.get(0)){
-                            neededCards.add(card);
-                            iterator.remove();
-                        }
+                    for(Card.Suit suit : Card.Suit.values()){
+                        Card card = new Card(figureRanks.get(0),suit);
+                        if(allCards.remove(card)) toReturn.add(card);
                     }
+                    return toReturn;
             }
-            return neededCards;
         }
+        throw new RuntimeException();
     }
 
-    //Removes hand from allHands when hand+cards form figure. Returns removed hands
-    private Set<Hand> neededHands(Set<Card> cards, Figure figure, Set<Hand> allHands) {
-
-        Set<Hand> neededHands = new HashSet<>();
-        Iterator<Hand> iterator;
+    //Removes Pair from allPairs when Pair+cards form figure. Returns removed Pairs
+    private Set<Pair> neededPairs(Set<Card> cards, Figure figure, Set<Pair> allPairs) {
+        Set<Pair> toReturn = new HashSet<>();
         if(figure.isSuitSignificant()){
+            List<Card> suitedCards = suitedCards(cards);
+            Iterator<Pair> iterator;
+            Card.Suit suit = suitedCards.get(0).getSuit();
+            if(figure.getCategory()== Figure.Category.FLUSH){
+                if(suitedCards.size()<3) return toReturn;
+                switch (suitedCards.size()){
+                    case 3:
 
-            ArrayList<Set<Card>> suitedCards = new ArrayList<>(4);
-            ArrayList<List<Card.Rank>> suitedRanks = new ArrayList<>(4);
-
-            for (int i = 0; i < 4; i++) {
-                suitedCards.add(new HashSet<>());
-                suitedRanks.add(new ArrayList<>());
-            }
-
-            for (Card card : cards) {
-                suitedCards.get(card.getSuit().getPower() - Card.Suit.values()[0].getPower()).add(card);
-                suitedRanks.get(card.getSuit().getPower() - Card.Suit.values()[0].getPower()).add(card.getRank());
-            }
-
-            for(int i=0;i<4;i++){
-                if(suitedCards.get(i).size()<3) continue;
-                Card.Suit suit = Card.Suit.values()[i];
-                if(figure.getCategory()== Figure.Category.FLUSH){
-                    switch (suitedCards.get(i).size()){
-                        case 3:
-                            iterator = allHands.iterator();
-                            while(iterator.hasNext()) {
-                                Hand Hand = iterator.next();
-                                if (Hand.getCard1().getSuit() == suit && Hand.getCard2().getSuit() == suit) {
-                                    neededHands.add(Hand);
-                                    iterator.remove();
+                        if(allPairs.size()>500){
+                            Card.Rank[] ranks = Card.Rank.values();
+                            for(int r1=0;r1<ranks.length;r1++){
+                                for(int r2=r1+1;r2<ranks.length;r2++){
+                                    Pair pair = new Pair(new Card(ranks[r2],suit),new Card(ranks[r1],suit));
+                                    if(allPairs.remove(pair)) toReturn.add(pair);
                                 }
                             }
-                            break;
-                        case 4:
-                            iterator = allHands.iterator();
-                            while(iterator.hasNext()) {
-                                Hand Hand = iterator.next();
-                                if (Hand.getCard1().getSuit() == suit || Hand.getCard2().getSuit() == suit) {
-                                    neededHands.add(Hand);
-                                    iterator.remove();
-                                }
-                            }
-                            break;
-                        default:
-                            neededHands.addAll(allHands);
-                            allHands.clear();
-                    }
-                }
-                else{
-                    List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
-                    List<Card.Rank> suitedCardsRanks = new ArrayList<>(getRanks(suitedCards.get(i)));
-                    for(Card.Rank rank : suitedCardsRanks) figureRanks.remove(rank);
-                    if(suitedCardsRanks.size()>2) continue;
-
-                    switch (suitedCardsRanks.size()){
-                        case 0:
-                            neededHands.addAll(allHands);
-                            allHands.clear();
-                            break;
-                        case 1:
-                            Card card = new Card(suitedCardsRanks.get(0),suit);
-                            iterator = allHands.iterator();
-                            while(iterator.hasNext()){
-                                Hand Hand = iterator.next();
-                                if(Hand.getCard1().equals(card) || Hand.getCard2().equals(card)){
-                                    neededHands.add(Hand);
-                                    iterator.remove();
-                                }
-                            }
-                            break;
-                        default:
-                            Card card1 = new Card(suitedCardsRanks.get(0),suit);
-                            Card card2 = new Card(suitedCardsRanks.get(1),suit);
-                            Hand newHand = new Hand(card1,card2);
-                            if(!allHands.contains(newHand)) break;
-                            neededHands.add(newHand);
-                            allHands.remove(newHand);
-                    }
-                }
-                return neededHands;
-            }
-            return neededHands;
-        }
-        else{
-            List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
-            List<Card.Rank> cardsRanks = new ArrayList<>(getRanks(cards));
-            for(Card.Rank rank : cardsRanks) figureRanks.remove(rank);
-            switch (figureRanks.size()){
-                case 0:
-                    neededHands.addAll(allHands);
-                    allHands.clear();
-                    break;
-                case 1:
-                    iterator = allHands.iterator();
-                    while(iterator.hasNext()) {
-                        Hand Hand = iterator.next();
-                        if (Hand.getCard1().getRank()==figureRanks.get(0) || Hand.getCard2().getRank()==figureRanks.get(0)){
-                            neededHands.add(Hand);
-                            iterator.remove();
+                            return toReturn;
                         }
-                    }
-                    break;
-
-                case 2:
-                    Collections.sort(figureRanks,Collections.reverseOrder());
-                    Card.Rank rank1 = figureRanks.get(0);
-                    Card.Rank rank2 = figureRanks.get(1);
-                    iterator = allHands.iterator();
-                    while(iterator.hasNext()) {
-                        Hand Hand = iterator.next();
-                        if (Hand.getCard1().getRank()==rank1 && Hand.getCard2().getRank()==rank2){
-                            neededHands.add(Hand);
-                            iterator.remove();
+                        else{
+                            Iterator<Pair> it3 = allPairs.iterator();
+                            while(it3.hasNext()){
+                                Pair pair = it3.next();
+                                if(pair.getCard1().getSuit()==suit && pair.getCard2().getSuit()==suit){
+                                    it3.remove();
+                                    toReturn.add(pair);
+                                }
+                            }
+                            return toReturn;
                         }
-                    }
-            }
-            return neededHands;
-        }
-    }
-
-    //Removes hand from allHands when hand+cards form figure
-    private void neededHandsRemove(Set<Card> cards, Figure figure, Set<Hand> allHands) {
-        if(figure.isSuitSignificant()){
-
-            ArrayList<Set<Card>> suitedCards = new ArrayList<>(4);
-            ArrayList<List<Card.Rank>> suitedRanks = new ArrayList<>(4);
-
-            for (int i = 0; i < 4; i++) {
-                suitedCards.add(new HashSet<>());
-                suitedRanks.add(new ArrayList<>());
-            }
-
-            //sorting by suit
-            for (Card card : cards) {
-                suitedCards.get(card.getSuit().getPower() - Card.Suit.values()[0].getPower()).add(card);
-                suitedRanks.get(card.getSuit().getPower() - Card.Suit.values()[0].getPower()).add(card.getRank());
-            }
-
-            for(int i=0;i<4;i++){
-                if(suitedCards.get(i).size()<3) continue;
-                Iterator<Hand> iterator;
-                Card.Suit suit = Card.Suit.values()[i];
-                if(figure.getCategory()== Figure.Category.FLUSH){
-                    switch (suitedCards.get(i).size()){
-                        case 3:
-                            iterator = allHands.iterator();
-                            while(iterator.hasNext()) {
-                                Hand Hand = iterator.next();
-                                if (Hand.getCard1().getSuit() == suit && Hand.getCard2().getSuit() == suit)
-                                    iterator.remove();
+                    case 4:
+                        iterator = allPairs.iterator();
+                        while(iterator.hasNext()) {
+                            Pair pair = iterator.next();
+                            if (pair.getCard1().getSuit() == suit || pair.getCard2().getSuit() == suit) {
+                                iterator.remove();
+                                toReturn.add(pair);
                             }
-                            break;
-                        case 4:
-                            iterator = allHands.iterator();
-                            while(iterator.hasNext()) {
-                                Hand Hand = iterator.next();
-                                if (Hand.getCard1().getSuit() == suit || Hand.getCard2().getSuit() == suit)
-                                    iterator.remove();
-                            }
-                            break;
-                        default:
-                            allHands.clear();
-                    }
+                        }
+                        return toReturn;
+                    default:
+                        toReturn = new HashSet<>(allPairs);
+                        allPairs.clear();
+                        return toReturn;
                 }
-                else{
-                    List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
-                    List<Card.Rank> suitedCardsRanks = new ArrayList<>(getRanks(suitedCards.get(i)));
-                    for(Card.Rank rank : suitedCardsRanks) figureRanks.remove(rank);
+            }
+            else{
+                List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
+                List<Card.Rank> suitedCardsRanks = new ArrayList<>(getRanks(suitedCards));
+                for(Card.Rank rank : suitedCardsRanks) figureRanks.remove(rank);
+                if(suitedCards.size()>2) return toReturn;
+                switch (suitedCardsRanks.size()){
+                    case 0:
+                        toReturn = new HashSet<>(allPairs);
+                        allPairs.clear();
+                        return toReturn;
+                    case 1:
+                        Card card = new Card(suitedCardsRanks.get(0),suit);
+                        if(allPairs.size()<200){
 
-                    if(suitedCardsRanks.size()>2) continue;
-
-                    switch (suitedCardsRanks.size()){
-                        case 0:
-                            allHands.clear();
-                            break;
-                        case 1:
-                            Card card = new Card(suitedCardsRanks.get(0),suit);
-                            iterator = allHands.iterator();
-                            while(iterator.hasNext()) {
-                                Hand Hand = iterator.next();
-                                if (Hand.getCard1().equals(card) || Hand.getCard2().equals(card))
-                                    iterator.remove();
+                            Iterator<Pair> it1 = allPairs.iterator();
+                            while(it1.hasNext()) {
+                                Pair pair = it1.next();
+                                if (pair.getCard1().equals(card) || pair.getCard2().equals(card)) {
+                                    it1.remove();
+                                    toReturn.add(pair);
+                                }
                             }
-                            break;
-                        default:
-                            Card card1 = new Card(suitedCardsRanks.get(0),suit);
-                            Card card2 = new Card(suitedCardsRanks.get(1),suit);
-                            Hand HandToDelete = new Hand(card1,card2);
-                            if(!allHands.contains(HandToDelete)) break;
-                            allHands.remove(HandToDelete);
-                    }
+                            return toReturn;
+                        }
+                        else{
+                            for(Card card2 : unused){
+                                Pair pair;
+                                if(card.compareTo(card2)<0){
+                                    pair = new Pair(card2,card);
+                                }
+                                else pair = new Pair(card,card2);
+                                if(allPairs.remove(pair)) toReturn.add(pair);
+                            }
+                            return toReturn;
+                        }
+                    default:
+                        Card card1 = new Card(suitedCardsRanks.get(0),suit);
+                        Card card2 = new Card(suitedCardsRanks.get(1),suit);
+                        Pair pair = new Pair(card1,card2);
+                        if(allPairs.remove(pair)) toReturn.add(pair);
+                        return toReturn;
                 }
-                return;
             }
         }
         else{
             List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
             List<Card.Rank> cardsRanks = new ArrayList<>(getRanks(cards));
-            Iterator<Hand> iterator;
+            Iterator<Pair> iterator;
             for(Card.Rank rank : cardsRanks) figureRanks.remove(rank);
+            if(figureRanks.size()>2) return toReturn;
             switch (figureRanks.size()){
                 case 0:
-                    allHands.clear();
-                    break;
+                    toReturn = new HashSet<>(allPairs);
+                    allPairs.clear();
+                    return toReturn;
                 case 1:
-                    iterator = allHands.iterator();
+                    iterator = allPairs.iterator();
                     while(iterator.hasNext()) {
-                        Hand Hand = iterator.next();
-                        if (Hand.getCard1().getRank()==figureRanks.get(0) && Hand.getCard2().getRank()==figureRanks.get(0))
+                        Pair pair = iterator.next();
+                        if (pair.getCard1().getRank()==figureRanks.get(0) || pair.getCard2().getRank()==figureRanks.get(0)) {
                             iterator.remove();
+                            toReturn.add(pair);
+                        }
                     }
-                    break;
+                    return toReturn;
 
                 case 2:
                     Collections.sort(figureRanks,Collections.reverseOrder());
                     Card.Rank rank1 = figureRanks.get(0);
                     Card.Rank rank2 = figureRanks.get(1);
-                    iterator = allHands.iterator();
-                    while(iterator.hasNext()) {
-                        Hand Hand = iterator.next();
-                        if (Hand.getCard1().getRank()==rank1 && Hand.getCard2().getRank()==rank2)
-                            iterator.remove();
+                    if(allPairs.size()>50) {
+                        Card.Suit[] suits = Card.Suit.values();
+                        for (Card.Suit suit1 : suits) {
+                            for (Card.Suit suit2 : suits) {
+                                Pair pair = new Pair(new Card(rank1, suit2), new Card(rank2, suit1));
+                                if(allPairs.remove(pair)) toReturn.add(pair);
+                            }
+                        }
                     }
+                    else{
+                        Iterator<Pair> it2 = allPairs.iterator();
+                        while(it2.hasNext()){
+                            Pair pair = it2.next();
+                            if(pair.getCard1().getRank()==rank1 && pair.getCard2().getRank()==rank2){
+                                it2.remove();
+                                toReturn.add(pair);
+                            }
+                        }
+                    }
+                    return toReturn;
             }
         }
+        throw new RuntimeException();
+    }
+
+    //Removes Pair from allPairs when Pair+cards form figure
+    private void neededPairsRemove(Set<Card> cards, Figure figure, Set<Pair> allPairs) {
+        if(figure.isSuitSignificant()){
+            List<Card> suitedCards = suitedCards(cards);
+            Card.Suit suit = suitedCards.get(0).getSuit();
+            if(suitedCards.size()<3) return;
+            if(figure.getCategory()== Figure.Category.FLUSH){
+                switch (suitedCards.size()){
+                    case 3:
+                        if(allPairs.size()>500){
+                            Card.Rank[] ranks = Card.Rank.values();
+                            for(int r1=0;r1<ranks.length;r1++){
+                                for(int r2=r1+1;r2<ranks.length;r2++){
+                                    Pair pair = new Pair(new Card(ranks[r2],suit),new Card(ranks[r1],suit));
+                                    allPairs.remove(pair);
+                                }
+                            }
+                            return;
+                        }
+                        else{
+                            Iterator<Pair> it3 = allPairs.iterator();
+                            while(it3.hasNext()){
+                                Pair pair = it3.next();
+                                if(pair.getCard1().getSuit()==suit && pair.getCard2().getSuit()==suit){
+                                    it3.remove();
+                                }
+                            }
+                            return ;
+                        }
+                    case 4:
+                        Iterator<Pair> iterator = allPairs.iterator();
+                        while(iterator.hasNext()) {
+                            Pair Pair = iterator.next();
+                            if (Pair.getCard1().getSuit() == suit || Pair.getCard2().getSuit() == suit) {
+                                iterator.remove();
+                            }
+                        }
+                        return;
+                    default:
+                        allPairs.clear();
+                        return;
+                }
+            }
+            else{
+                List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
+                List<Card.Rank> suitedCardsRanks = new ArrayList<>(getRanks(suitedCards));
+                for(Card.Rank rank : suitedCardsRanks) figureRanks.remove(rank);
+                if(suitedCardsRanks.size()>2) return;
+                switch (suitedCardsRanks.size()){
+                    case 0:
+                        allPairs.clear();
+                        return;
+                    case 1:
+                        Card card = new Card(suitedCardsRanks.get(0),suit);
+                        if(allPairs.size()<200) {
+                            Iterator<Pair> it1 = allPairs.iterator();
+                            while (it1.hasNext()) {
+                                Pair Pair = it1.next();
+                                if (Pair.getCard1().equals(card) || Pair.getCard2().equals(card)) {
+                                    it1.remove();
+                                }
+                            }
+                            return;
+                        }
+                        else{
+                            for(Card card2 : unused){
+                                Pair pair;
+                                if(card.compareTo(card2)<0){
+                                    pair = new Pair(card2,card);
+                                }
+                                else pair = new Pair(card,card2);
+                                allPairs.remove(pair);
+                            }
+                            return;
+                        }
+                    default:
+                        Collections.sort(suitedCardsRanks,Collections.reverseOrder());
+                        Card card1 = new Card(suitedCardsRanks.get(0),suit);
+                        Card card2 = new Card(suitedCardsRanks.get(1),suit);
+                        Pair pair = new Pair(card1,card2);
+                        allPairs.remove(pair);
+                        return;
+                }
+            }
+
+        }
+        else{
+            List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
+            List<Card.Rank> cardsRanks = new ArrayList<>(getRanks(cards));
+            Iterator<Pair> iterator;
+            for(Card.Rank rank : cardsRanks) figureRanks.remove(rank);
+            if(figureRanks.size()>2) return;
+            switch (figureRanks.size()){
+                case 0:
+                    allPairs.clear();
+                    return;
+                case 1:
+                    iterator = allPairs.iterator();
+                    while(iterator.hasNext()) {
+                        Pair Pair = iterator.next();
+                        if (Pair.getCard1().getRank()==figureRanks.get(0) || Pair.getCard2().getRank()==figureRanks.get(0)) {
+                            iterator.remove();
+                        }
+                    }
+                    return;
+
+                case 2:
+                    Collections.sort(figureRanks,Collections.reverseOrder());
+                    Card.Rank rank1 = figureRanks.get(0);
+                    Card.Rank rank2 = figureRanks.get(1);
+                    if(allPairs.size()>50) {
+                        Card.Suit[] suits = Card.Suit.values();
+                        for (Card.Suit suit1 : suits) {
+                            for (Card.Suit suit2 : suits) {
+                                Pair pair = new Pair(new Card(rank1, suit2), new Card(rank2, suit1));
+                                allPairs.remove(pair);
+                            }
+                        }
+                    }
+                    else{
+                        Iterator<Pair> it2 = allPairs.iterator();
+                        while(it2.hasNext()){
+                            Pair pair = it2.next();
+                            if(pair.getCard1().getRank()==rank1 && pair.getCard2().getRank()==rank2){
+                                it2.remove();
+                            }
+                        }
+                    }
+                    return;
+            }
+        }
+        throw new RuntimeException();
     }
 
     //Returns true if cards form figure
     private boolean isFigure(Figure figure, Collection<Card> cards) {
 
         if(figure.isSuitSignificant()) {
-
-            ArrayList<List<Card>> suitedCards = new ArrayList<>(4);
-            ArrayList<List<Card.Rank>> suitedRanks = new ArrayList<>(4);
-
-            for (int i = 0; i < 4; i++) {
-                suitedCards.add(new ArrayList<>());
-                suitedRanks.add(new ArrayList<>());
+            List<Card> suitedCards = suitedCards(cards);
+            if(figure.getCategory()== Figure.Category.FLUSH){
+                return suitedCards.size()>=5;
             }
-
-            //sorting by suit
-            for (Card card : cards) {
-                suitedCards.get(card.getSuit().getPower() - Card.Suit.values()[0].getPower()).add(card);
-                suitedRanks.get(card.getSuit().getPower() - Card.Suit.values()[0].getPower()).add(card.getRank());
+            else{
+                List<Card.Rank> suitedFigureRanks = new ArrayList<>(figure.getRanks());
+                List<Card.Rank> suitedCardsRanks = new ArrayList<>(getRanks(suitedCards));
+                for(Card.Rank rank : suitedCardsRanks) suitedFigureRanks.remove(rank);
+                return suitedFigureRanks.isEmpty();
             }
-
-            for(int i=0; i<4; i++){
-                if(suitedCards.get(i).size()<3) continue;
-                if(figure.getCategory()== Figure.Category.FLUSH){
-                    return suitedCards.get(i).size()>=5;
-                }
-                else{
-                    List<Card.Rank> suitedFigureRanks = new ArrayList<>(figure.getRanks());
-                    List<Card.Rank> suitedCardsRanks = new ArrayList<>(getRanks(suitedCards.get(i)));
-                    for(Card.Rank rank : suitedCardsRanks) suitedFigureRanks.remove(rank);
-                    if(suitedFigureRanks.isEmpty()) return true;
-                }
-            }
-            return false;
         }
         else{
             List<Card.Rank> figureRanks = new ArrayList<>(figure.getRanks());
@@ -678,108 +800,93 @@ public class StatisticsGenerator {
         return cardsRanks;
     }
 
-    //Returns 1 if player wins, returns -1 if opponent wins (both have FLUSH)
-    private int flushResult(Set<Card> player, Set<Card> opponent) {
-        List<List<Card.Rank>> playerSorted = new ArrayList<>();
-        for(int i = 0;i<4;i++){
-            playerSorted.add(new ArrayList<>());
-        }
-        for(Card card : player){
-            playerSorted.get(card.getSuit().getPower()-1).add(card.getRank());
-        }
-        int i;
-        for(i=0;i<4;i++){
-            if(playerSorted.get(i).size()>4){
-                Card.Suit suit = Card.Suit.values()[i];
-                Collections.sort(playerSorted.get(i));
-                Iterator<Card.Rank> playerIterator = playerSorted.get(i).iterator();
-                Iterator<Card> opponentIterator = opponent.iterator();
-                while(true){
-                    Card card = opponentIterator.next();
-                    if(card.getSuit()==suit){
-                        if(card.getRank().getPower()<playerIterator.next().getPower()) return 1;
-                        else return -1;
-                    }
-                }
+    //Returns 1 if player wins, returns -1 if opponent wins, draw 0 (both have FLUSH)
+    private int flushResult(Set<Card> playerCards, Set<Card> opponentCards) {
+        List<Card> player = suitedCards(playerCards);
+        List<Card> opponent = suitedCards(opponentCards);
+        Collections.sort(player,Collections.reverseOrder());
+        Collections.sort(opponent,Collections.reverseOrder());
+        for(int i=0;i<5;i++){
+            Card playerCard = player.get(i);
+            Card opponentCard = opponent.get(i);
+            if(playerCard.getRank()!=opponentCard.getRank()){
+                return playerCard.getRank().getPower().compareTo(opponentCard.getRank().getPower());
             }
         }
-        
-        return -1;
-
+        return 0;
     }
 
-    static private Collection<Card> usedCards(Figure figure,Collection<Card> neededCards,Collection<Card> hand, Collection<Card> table){
-        Set<Card> cardSet = new HashSet<>();
+    //returns used cards from hand,table,other
+    static private Collection<Card> usedCards(Figure figure,Collection<Card> other,Collection<Card> table, Collection<Card> hand){
+        Set<Card> setToReturn = new HashSet<>();
         List<Card.Rank> ranks =  new ArrayList<>(figure.getRanks());
         List<Card> list = new ArrayList<>();
-        list.addAll(hand); list.addAll(table); list.addAll(neededCards);
-        int size = ranks.size();
+        list.addAll(hand); list.addAll(table); list.addAll(other);
         if(!figure.isSuitSignificant()){
             for(Card card : list) {
                 if (ranks.contains(card.getRank())) {
-                    cardSet.add(card);
+                    setToReturn.add(card);
                     ranks.remove(card.getRank());
-                    if(ranks.size()==size) return cardSet;
+                    if(ranks.isEmpty()) return setToReturn;
                 }
             }
         }
         else{
-            int[] countSuit = new int[4];
-            for(Card card : list) {
-                countSuit[card.getSuit().getPower()-Card.Suit.values()[0].getPower()]++;
-            }
-            Card.Suit suit = Card.Suit.CLUBS;
-            for(int i= 0;i<4;i++){
-                if(countSuit[i]>=5){
-                    suit = Card.Suit.values()[i];break;
-                }
-            }
+            List<Card> suitedList = suitedCards(list);
             if(figure.getCategory()== Figure.Category.FLUSH){
-                List<Card> cardList = new ArrayList<>();
 
-                for(Card card : list) {
-                    if (card.getSuit()==suit){
-                        cardList.add(card);
-                    }
-                }
-                Collections.sort(cardList,Collections.reverseOrder());
-                for(int i=0;i<5;i++) cardSet.add(cardList.get(i));
-                return cardSet;
+                Collections.sort(suitedList,Collections.reverseOrder());
+                for(int i=0;i<5;i++) setToReturn.add(suitedList.get(i));
+                return setToReturn;
             }
-            for(Card card : list) {
-                if (card.getSuit()==suit && ranks.contains(card.getRank())) {
-                    cardSet.add(card);
+            for(Card card : suitedList) {
+                if (ranks.contains(card.getRank())) {
+                    setToReturn.add(card);
                     ranks.remove(card.getRank());
-                    if(ranks.size()==size) return cardSet;
+                    if(ranks.isEmpty()) return setToReturn;
                 }
 
             }
         }
-        return cardSet;
+        throw new RuntimeException();
+    }
+
+    //returns list of cards with most common suit
+    private static List<Card> suitedCards(Collection<Card> cards) {
+        List<List<Card>> suitedCards = new ArrayList<>();
+        for(int i=0;i<4;i++) suitedCards.add(new ArrayList<>());
+        for(Card card : cards){
+            suitedCards.get(card.getSuit().getPower()-1).add(card);
+        }
+        int max = 0;
+        for(int i=0;i<4;i++){
+            if(suitedCards.get(i).size()>suitedCards.get(max).size()) max=i;
+        }
+        return suitedCards.get(max);
     }
 
     //Binomial coefficient
-    static private int choose(int n, int k) {
-        int result = 1;
-        for(int i = 0; i < k ; i++) result *= (n-i);
-        for(int i = 1 ; i<=k ; i++) result/=i;
+    static private long choose(long n, int k) {
+        long result = 1;
+        for(int i = 0; i < k ; i++){
+            result *= (n-i); result/=(i+1);
+        }
         return result;
     }
 
-    //generates all hands from collection of cards
-    static private Set<Hand> handGenerator(Collection<Card> cards) {
+    //generates all Pairs from collection of cards
+    static private Set<Pair> PairGenerator(Collection<Card> cards) {
         List<Card> cardsList = new ArrayList<>(cards);
         Collections.sort(cardsList,Collections.reverseOrder());
-        Set<Hand> Hands = new HashSet<>();
+        Set<Pair> Pairs = new HashSet<>();
         for(int i=0;i<cardsList.size();i++){
             Card card1 = cardsList.get(i);
             for(int j=i+1;j<cardsList.size();j++){
                 Card card2 = cardsList.get(j);
-                boolean suit = card1.getSuit()==cardsList.get(j).getSuit();
-                Hands.add(new Hand(card1,card2,suit));
+                Pairs.add(new Pair(card1,card2));
             }
         }
-        return Hands;
+        return Pairs;
     }
 
 }
