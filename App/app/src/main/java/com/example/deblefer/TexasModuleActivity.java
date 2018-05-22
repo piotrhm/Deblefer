@@ -24,6 +24,7 @@ import com.example.deblefer.Classes.IconData;
 import com.example.deblefer.Classes.StatisticViewAdapter;
 import com.example.deblefer.Classes.Statistics;
 import com.example.deblefer.Classes.StatisticsGenerator;
+import com.example.deblefer.Classes.TestStatisticsViewAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -153,8 +154,10 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView5));
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
 
+        recyclerView.setHasFixedSize(true);
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setNestedScrollingEnabled(false);
+        recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
 
         addButton = findViewById(R.id.addCardButton);
         randomButton = findViewById(R.id.randomButton);
@@ -202,17 +205,15 @@ public class TexasModuleActivity extends AppCompatActivity {
     }
 
     private void updateStatsView(List<Statistics> listOfStats){
-        IconData[] data = new IconData[listOfStats.size()];
+        /*IconData[] data = new IconData[listOfStats.size()];
         for(int i = 0; i < listOfStats.size(); i++) {
             data[i] = new IconData(listOfStats.get(i).getUsedCards(),
                     listOfStats.get(i).getFigure(),
                     listOfStats.get(i).getChanceOfWinning(),
                     listOfStats.get(i).getChanceOfGetting());
-        }
+        }*/
 
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
-        recyclerView.setAdapter(new StatisticViewAdapter(data));
+        recyclerView.setAdapter(new TestStatisticsViewAdapter(listOfStats));
     }
 
     private void setPlayersCountTextView(){

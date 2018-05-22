@@ -2,7 +2,11 @@ package com.example.deblefer.Classes;
 
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /*
  * nie nadaje sie do hashowania
@@ -13,7 +17,7 @@ public class Statistics implements Comparable<Statistics>{
     private Double chanceToWin;
     private Double chanceToGet;
     private Double chanceToDraw;
-    private Collection<Card> usedCards;
+    private List<Card> usedCards;
 
     public Double getChanceOfGetting() { return chanceToGet; }
 
@@ -21,14 +25,15 @@ public class Statistics implements Comparable<Statistics>{
 
     public Double getChanceOfDraw(){ return chanceToDraw; }
 
-    public Collection<Card> getUsedCards(){return usedCards;}
+    public List<Card> getUsedCards(){return usedCards;}
 
     Statistics(Figure figure, double chanceToGet, double chanceToWin, double chanceToDraw, Collection<Card> usedCards){
         this.figure = figure;
         this.chanceToGet = chanceToGet;
         this.chanceToWin = chanceToWin;
         this.chanceToDraw = chanceToDraw;
-        this.usedCards = usedCards;
+        this.usedCards = new ArrayList<>(usedCards);
+        Collections.sort(this.usedCards);
     }
 
     public Figure getFigure() {
