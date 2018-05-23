@@ -1,11 +1,14 @@
 package com.example.deblefer.Classes;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,9 +20,28 @@ import java.util.List;
 public class TestStatisticsViewAdapter extends RecyclerView.Adapter<TestStatisticsViewAdapter.ViewHolder> {
 
     private List<Statistics> listOfStats;
+    private Context context;
 
     public TestStatisticsViewAdapter(List<Statistics> listOfStats) {
         this.listOfStats = listOfStats;
+    }
+
+    public void addItem(Statistics stat){
+        int pos = listOfStats.size();
+        for (int i = 0; i < listOfStats.size(); i++) {
+            if(listOfStats.get(i).compareTo(stat) < 0){
+                pos = i;
+                break;
+            }
+        }
+        listOfStats.add(pos, stat);
+        notifyItemInserted(pos);
+    }
+
+    public void clearItems(){
+        int count = listOfStats.size();
+        listOfStats.clear();
+        notifyItemRangeRemoved(0, count);
     }
 
     @NonNull
@@ -30,18 +52,30 @@ public class TestStatisticsViewAdapter extends RecyclerView.Adapter<TestStatisti
         return new ViewHolder(listItem);
     }
 
-    @SuppressLint("DefaultLocale")
+    @SuppressLint({"DefaultLocale", "SetTextI18n"})
     @Override
     public void onBindViewHolder(@NonNull TestStatisticsViewAdapter.ViewHolder holder, int position) {
         Statistics stat = listOfStats.get(position);
         List<Card> listOfCards = stat.getUsedCards();
         holder.textView.setText(stat.getFigure().getCategory().toString());
-        holder.textView2.setText(String.format("%.2f", stat.getChanceOfGetting()));
-        holder.textView3.setText(String.format("%.2f", stat.getChanceOfWinning()));
+        holder.textView2.setText(String.format("%.2f", stat.getChanceOfGetting()*100)+"%");
+        holder.textView3.setText(String.format("%.2f", stat.getChanceOfWinning()*100)+"%");
         int i = 0;
         for(ImageView imageView : holder.cardImages)
             imageView.setImageResource(getCardId(listOfCards, i++));
+        /*setAnimation(holder.itemView, position);*/
     }
+
+    /*private void setAnimation(View viewToAnimate, int position)
+    {
+        // If the bound view wasn't previously displayed on screen, it's animated
+        if (position > lastPosition)
+        {
+            Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
+            viewToAnimate.startAnimation(animation);
+            lastPosition = position;
+        }
+    }*/
 
     @Override
     public int getItemCount() {

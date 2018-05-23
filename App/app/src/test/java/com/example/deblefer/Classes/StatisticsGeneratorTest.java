@@ -1,3 +1,4 @@
+/*
 package com.example.deblefer.Classes;
 
 import org.junit.Test;
@@ -17,15 +18,16 @@ public class StatisticsGeneratorTest {
         List<Card> table = new ArrayList<>();
         Collections.sort(unused);
 
-        hand.add(unused.get(unused.size()-51)); unused.remove(unused.size()-51);
-        hand.add(unused.get(unused.size()-50)); unused.remove(unused.size()-50);
-        table.add(unused.get(unused.size()-32)); unused.remove(unused.size()-32);
+        hand.add(unused.get(19)); unused.remove(19);
+        hand.add(unused.get(50)); unused.remove(50);
+        table.add(unused.get(34)); unused.remove(34);
         table.add(unused.get(unused.size()-45)); unused.remove(unused.size()-45);
-        table.add(unused.get(unused.size()-14)); unused.remove(unused.size()-14);
-     //   table.add(unused.get(unused.size()-20)); unused.remove(unused.size()-20);
+       // table.add(unused.get(15)); unused.remove(15);
+       // table.add(unused.get(10)); unused.remove(10);
+        table.add(unused.get(unused.size()-20)); unused.remove(unused.size()-20);
+        StatisticsSettings statisticsSettings = new StatisticsSettings(0.02,true);
 
-
-        List<Statistics> stats = new ArrayList<>(StatisticsGenerator.getStatistics(3,hand,table,unused));
+        List<Statistics> stats = new ArrayList<>(StatisticsGenerator.getStatistics(2,hand,table,unused,statisticsSettings));
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         System.out.println("Time: "+elapsedTime);
@@ -40,7 +42,7 @@ public class StatisticsGeneratorTest {
         System.out.println();
         System.out.println("TABLE:"+table);
         System.out.println("HAND: "+hand);
-        assertTrue(one<1.001 && one>.999);
+//        assertTrue(one<1.001 && one>.999);
 
     }
-}
+}*/

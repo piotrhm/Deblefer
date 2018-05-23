@@ -48,7 +48,7 @@ public class Hand {
 
     @Override
     public String toString() {
-        return card1.getRank().getSimpleName() + card2.getRank().getSimpleName() + (suitIsDifferent ? "s" : "o");
+        return card1.getRank().getSimpleName() + card2.getRank().getSimpleName() + (suitIsDifferent ? "o" : "s");
     }
 
 

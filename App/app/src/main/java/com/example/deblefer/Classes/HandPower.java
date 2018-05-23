@@ -27,7 +27,7 @@ public class HandPower {
 
     }
 
-    private static void initializePowers(Context context){
+    public static void initializePowers(Context context){
         if(powers != null)
             return;
         try {
@@ -53,7 +53,7 @@ public class HandPower {
     public static Double getHandPower(Card card1, Card card2, Context context){
         if(powers == null)
             initializePowers(context);
-        return powers.get(new Hand(card1, card2).toString());
+        return 100-powers.get(new Hand(card1, card2).toString());
     }
 
     static public Collection<Hand> getUnmodifableHands(){
