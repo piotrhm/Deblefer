@@ -3,7 +3,6 @@ package com.example.deblefer.Classes;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -15,11 +14,12 @@ public class Statistics implements Comparable<Statistics>{
 
     private Figure figure;
     private Double chanceToWin;
-    private Double chanceToGet;
+    private Double chanceToGetAsHighest;
+    private Double chanceOfGet;
     private Double chanceToDraw;
     private List<Card> usedCards;
 
-    public Double getChanceOfGetting() { return chanceToGet; }
+    public Double getChanceOfGetting() { return chanceToGetAsHighest; }
 
     public Double getChanceOfWinning() { return chanceToWin; }
 
@@ -27,9 +27,9 @@ public class Statistics implements Comparable<Statistics>{
 
     public List<Card> getUsedCards(){return usedCards;}
 
-    Statistics(Figure figure, double chanceToGet, double chanceToWin, double chanceToDraw, Collection<Card> usedCards){
+    Statistics(Figure figure, double chanceToGetAsHighest, double chanceToWin, double chanceToDraw, Collection<Card> usedCards){
         this.figure = figure;
-        this.chanceToGet = chanceToGet;
+        this.chanceToGetAsHighest = chanceToGetAsHighest;
         this.chanceToWin = chanceToWin;
         this.chanceToDraw = chanceToDraw;
         this.usedCards = new ArrayList<>(usedCards);
@@ -42,17 +42,17 @@ public class Statistics implements Comparable<Statistics>{
 
     @Override
     public String toString() {
-        return figure + " " + chanceToGet+ " " + chanceToWin + " " + chanceToDraw ;
+        return figure + " " + chanceToGetAsHighest + " " + chanceToWin + " " + chanceToDraw ;
     }
 
     @Override
     public int compareTo(@NonNull Statistics o) {
-        if(Double.compare(chanceToWin*chanceToGet, o.chanceToWin*o.chanceToGet) == 0){
-            if(Double.compare(chanceToGet, o.chanceToGet) == 0)
+        if(Double.compare(chanceToWin* chanceToGetAsHighest, o.chanceToWin*o.chanceToGetAsHighest) == 0){
+            if(Double.compare(chanceToGetAsHighest, o.chanceToGetAsHighest) == 0)
                 return figure.compareTo(o.figure);
-            return Double.compare(chanceToGet, o.chanceToGet);
+            return Double.compare(chanceToGetAsHighest, o.chanceToGetAsHighest);
         }
-        return Double.compare(chanceToWin*chanceToGet, o.chanceToWin*o.chanceToGet);
+        return Double.compare(chanceToWin* chanceToGetAsHighest, o.chanceToWin*o.chanceToGetAsHighest);
     }
 
 

@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -62,7 +64,7 @@ public class TexasModuleActivity extends AppCompatActivity {
             pointsTextView.setVisibility(View.VISIBLE);
             pointsThread = new Thread(new PointsLoadingRunner(pointsTextView));
             pointsThread.start();
-            addButton.setClickable(false);
+            setClickableButtons(false);
             recyclerAdapter.clearItems();
         }
 
@@ -77,7 +79,9 @@ public class TexasModuleActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(List<Statistics> statistics) {
-            addButton.setClickable(true);
+            setClickableButtons(true);
+            if(getUsedCardCount() == 7)
+                addButton.setClickable(false);
             pointsThread.interrupt();
             if(statistics.isEmpty())
                 pointsTextView.post(() -> pointsTextView.setText("NOTHING!"));
@@ -121,6 +125,7 @@ public class TexasModuleActivity extends AppCompatActivity {
             }
 
             if (TexasModuleActivity.this.getUsedCardCount() == 7) {
+                new UpdateStatisticsAsync().execute();
                 addButton.setClickable(false);
             }
         }
@@ -240,25 +245,13 @@ public class TexasModuleActivity extends AppCompatActivity {
     }
 
     private void setCardViewActive(ImageView cardView, Card card){
+//        cardView.setAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide));
         cardView.setImageResource(Deck.getCardImageId(card));
     }
 
     private void setCardViewInactive(ImageView cardView){
         cardView.setImageResource(R.drawable.unused);
     }
-
-   /* @Deprecated
-    private void updateStatsView(List<Statistics> listOfStats){
-        IconData[] data = new IconData[listOfStats.size()];
-        for(int i = 0; i < listOfStats.size(); i++) {
-            data[i] = new IconData(listOfStats.get(i).getUsedCards(),
-                    listOfStats.get(i).getFigure(),
-                    listOfStats.get(i).getChanceOfWinning(),
-                    listOfStats.get(i).getChanceOfGetting());
-        }
-
-        recyclerView.setAdapter(new StatisticViewAdapter(data));
-    }*/
 
     private void setPlayersCountTextView(){
         playersCountTextView.setText("players:\n" + playersCount);
@@ -294,6 +287,14 @@ public class TexasModuleActivity extends AppCompatActivity {
                 return true;
             default: return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void setClickableButtons(boolean clickable){
+        addPlayerButton.setClickable(clickable);
+        addPlayerButton.setClickable(clickable);
+        minusPlayerButton.setClickable(clickable);
+        passButton.setClickable(clickable);
+        randomButton.setClickable(clickable);
     }
 
 }
