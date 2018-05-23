@@ -3,7 +3,7 @@
     <CheckBoxPreference
         android:title="Draw"
         android:defaultValue="true"
-        android:summary="when both players have same figure"
+        android:summary="when both players have the same figure"
         android:key="pref_drawsCheckBox" />
     <EditTextPreference
         android:defaultValue="1"

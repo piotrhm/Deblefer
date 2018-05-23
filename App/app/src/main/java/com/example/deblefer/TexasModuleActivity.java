@@ -61,6 +61,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             addButton.setClickable(false);
+            recyclerAdapter.clearItems();
         }
 
         @Override
@@ -88,11 +89,6 @@ public class TexasModuleActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(TexasModuleActivity.this);
-            boolean draws = prefs.getBoolean("pref_drawsCheckBox", false);
-            double minChanceOfGetting = ((double)Integer.valueOf(prefs.getString("pref_chanceOfGetting_limit","5")))/100;
-            StatisticsSettings statisticsSettings = new StatisticsSettings(minChanceOfGetting,draws);
 
             Card card = addedCards.iterator().next();
 
@@ -279,12 +275,10 @@ public class TexasModuleActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()){
             case R.id.multiplayer:
-                Intent intent1 = new Intent(this,Multiplayer.class);
-                this.startActivity(intent1);
+                this.startActivity(new Intent(this,Multiplayer.class));
                 return true;
             case R.id.settings:
-                Intent intent3 = new Intent(this,SettingsActivity.class);
-                this.startActivity(intent3);
+                this.startActivity(new Intent(this,SettingsActivity.class));
                 return true;
             case R.id.exit:
                 finish();
