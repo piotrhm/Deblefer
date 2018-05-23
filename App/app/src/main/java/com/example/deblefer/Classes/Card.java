@@ -48,6 +48,12 @@ public class Card implements Comparable<Card>{
                 + suit.toString().toLowerCase();
     }
 
+    public String toString2() {
+        return rank.toString().toLowerCase()
+                + " of "
+                + suit.toString().toLowerCase();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof Card){

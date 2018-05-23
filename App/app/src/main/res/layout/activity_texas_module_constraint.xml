@@ -7,6 +7,7 @@
 
     <Button
         android:id="@+id/minusPlayerButton"
+        style="@android:style/Widget.DeviceDefault.Button.Borderless"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginTop="120dp"
@@ -18,11 +19,7 @@
         android:id="@+id/cardImageView1"
         android:layout_width="60dp"
         android:layout_height="75dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginRight="32dp"
         android:layout_marginTop="24dp"
-        app:layout_constraintEnd_toStartOf="@+id/addCardButton"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/cardImageView0"
         app:layout_constraintTop_toBottomOf="@+id/cardImageView4"
         app:srcCompat="@drawable/unused" />
@@ -35,6 +32,8 @@
         android:layout_marginStart="60dp"
         android:layout_marginTop="24dp"
         app:layout_constraintEnd_toStartOf="@+id/cardImageView1"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardImageView2"
         app:srcCompat="@drawable/unused"
@@ -101,54 +100,62 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/addCardButton"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="48dp"
+        android:layout_height="53dp"
         android:layout_marginEnd="70dp"
-        android:layout_marginLeft="70dp"
+        android:layout_marginLeft="40dp"
         android:layout_marginRight="70dp"
-        android:layout_marginStart="70dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="32dp"
         android:clickable="true"
-        app:backgroundTint="@android:color/darker_gray"
+        android:src="@drawable/plus"
+        app:backgroundTint="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/cardImageView1"
         app:layout_constraintTop_toBottomOf="@+id/cardImageView5"
-        app:rippleColor="@android:color/background_light"
-        app:srcCompat="@android:drawable/ic_menu_add"
+        app:rippleColor="@android:color/transparent"
         tools:srcCompat="@android:drawable/ic_menu_add" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:layout_width="350dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/playersCountTextView"
+        app:layout_constraintTop_toBottomOf="@+id/pointsTextView"
         tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/passButton"
+        style="@android:style/Widget.DeviceDefault.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
         android:text="Pass"
         app:layout_constraintBottom_toBottomOf="@+id/randomButton"
-        app:layout_constraintEnd_toEndOf="@+id/cardImageView6"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/randomButton"
         app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/randomButton"
+        style="@android:style/Widget.DeviceDefault.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:text="Random"
-        app:layout_constraintStart_toStartOf="@+id/cardImageView0"
+        app:layout_constraintEnd_toStartOf="@+id/minusPlayerButton"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardImageView0" />
 
     <Button
         android:id="@+id/addPlayerButton"
+        style="@android:style/Widget.DeviceDefault.Button.Borderless"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginTop="120dp"
@@ -188,6 +195,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
+
+    <TextView
+        android:id="@+id/pointsTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:gravity="top"
+        android:padding="0dp"
+        android:text=":::"
+        android:textAlignment="center"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/randomButton" />
 
 
 </android.support.constraint.ConstraintLayout>

@@ -22,11 +22,8 @@ import android.widget.TextView;
 import com.example.deblefer.Classes.Card;
 import com.example.deblefer.Classes.CustomDialog;
 import com.example.deblefer.Classes.Deck;
-import com.example.deblefer.Classes.Game;
-import com.example.deblefer.Classes.Hand;
 import com.example.deblefer.Classes.HandPower;
-import com.example.deblefer.Classes.IconData;
-import com.example.deblefer.Classes.StatisticViewAdapter;
+import com.example.deblefer.Classes.PointsLoadingRunner;
 import com.example.deblefer.Classes.Statistics;
 import com.example.deblefer.Classes.StatisticsGenerator;
 import com.example.deblefer.Classes.StatisticsSettings;
@@ -55,11 +52,16 @@ public class TexasModuleActivity extends AppCompatActivity {
     private Button minusPlayerButton;
     private Button passButton;
     private Button randomButton;
+    private TextView pointsTextView;
 
     private class UpdateStatisticsAsync extends AsyncTask<Object[], Void, List<Statistics>>{
+        Thread pointsThread;
 
         @Override
         protected void onPreExecute() {
+            pointsTextView.setVisibility(View.VISIBLE);
+            pointsThread = new Thread(new PointsLoadingRunner(pointsTextView));
+            pointsThread.start();
             addButton.setClickable(false);
             recyclerAdapter.clearItems();
         }
@@ -76,6 +78,11 @@ public class TexasModuleActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<Statistics> statistics) {
             addButton.setClickable(true);
+            pointsThread.interrupt();
+            if(statistics.isEmpty())
+                pointsTextView.post(() -> pointsTextView.setText("NOTHING!"));
+            else
+                pointsTextView.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -134,7 +141,7 @@ public class TexasModuleActivity extends AppCompatActivity {
     private void initializeListeners(){
         addButton.setOnClickListener(v -> {
             CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
-            AlertDialog alertDialog = dialog.showDialog(1, deck, new onDialogFinishHandler());
+            AlertDialog alertDialog = dialog.showDialog(deck, new onDialogFinishHandler());
             alertDialog.show();
         });
         passButton.setOnClickListener(v -> {
@@ -188,7 +195,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
 
         recyclerView = findViewById(R.id.recyclerView);
-//        recyclerView.setHasFixedSize(true);
+//      recyclerView.setHasFixedSize(true);
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setAdapter(recyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
@@ -200,6 +207,8 @@ public class TexasModuleActivity extends AppCompatActivity {
         addPlayerButton = findViewById(R.id.addPlayerButton);
         playersCountTextView = findViewById(R.id.playersCountTextView);
         handPowerTextView = findViewById(R.id.handPowerTextView);
+        pointsTextView = findViewById(R.id.pointsTextView);
+        pointsTextView.setVisibility(View.INVISIBLE);
     }
 
     private void restart(){
