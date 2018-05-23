@@ -112,11 +112,7 @@ public class StatisticsGenerator {
                 allPairsCombinations += choose(allPairsForOpponent.size(),players - 1);
 
                 //wins
-                int start = figureIndex - 1;
-                if(statisticsSettings.isDrawWhenSameFigure()){
-                    start=figureIndex;
-                }
-                for(int i = 0 ; i<=start && !allPairsForOpponent.isEmpty() ; i++){
+                for(int i = 0 ; i< figureIndex && !allPairsForOpponent.isEmpty() ; i++){
                     Figure opponentFigure =sortedFigures.get(i);
                     Set<Card> opponentCards = new HashSet<>(table);
                     opponentCards.addAll(neededPair.getCards());

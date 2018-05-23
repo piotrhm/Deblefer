@@ -24,7 +24,8 @@ public class StatisticsGeneratorTest {
        // table.add(unused.get(15)); unused.remove(15);
        // table.add(unused.get(10)); unused.remove(10);
         table.add(unused.get(unused.size()-20)); unused.remove(unused.size()-20);
-        StatisticsSettings statisticsSettings = new StatisticsSettings(0.02,true);
+
+        StatisticsSettings statisticsSettings = new StatisticsSettings(0.2,true);
 
         List<Statistics> stats = new ArrayList<>(StatisticsGenerator.getStatistics(2,hand,table,unused,statisticsSettings));
         long stopTime = System.currentTimeMillis();
