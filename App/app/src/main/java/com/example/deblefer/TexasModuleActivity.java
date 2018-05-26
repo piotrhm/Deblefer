@@ -15,8 +15,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -83,10 +81,7 @@ public class TexasModuleActivity extends AppCompatActivity {
             if(getUsedCardCount() == 7)
                 addButton.setClickable(false);
             pointsThread.interrupt();
-            if(statistics.isEmpty())
-                pointsTextView.post(() -> pointsTextView.setText("NOTHING!"));
-            else
-                pointsTextView.setVisibility(View.INVISIBLE);
+            pointsTextView.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -225,6 +220,8 @@ public class TexasModuleActivity extends AppCompatActivity {
         handPowerTextView.setVisibility(View.INVISIBLE);
         recyclerAdapter.clearItems();
 
+        setClickableButtons(true);
+
         for (ImageView cardView : cardImages)
             setCardViewInactive(cardView);
     }
@@ -290,7 +287,7 @@ public class TexasModuleActivity extends AppCompatActivity {
     }
 
     public void setClickableButtons(boolean clickable){
-        addPlayerButton.setClickable(clickable);
+        addButton.setClickable(clickable);
         addPlayerButton.setClickable(clickable);
         minusPlayerButton.setClickable(clickable);
         passButton.setClickable(clickable);
