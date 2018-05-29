@@ -286,6 +286,12 @@ public class TexasModuleActivity extends AppCompatActivity {
         runUpdateStatistics();
     }
 
+    public void rejectChosenCardsInDialog(){
+        for(List<CardInDialog> lists : listOfFoursCards)
+            for(CardInDialog cardInDialog : lists)
+                cardInDialog.setChosen(false);
+    }
+
     private void addCardToProperSet(Card card){
         if(getUsedCardCount() < 2)
             hand.add(card);

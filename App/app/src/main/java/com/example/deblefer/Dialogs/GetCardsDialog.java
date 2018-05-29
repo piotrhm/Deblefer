@@ -17,7 +17,7 @@ import java.util.Collection;
 public class GetCardsDialog{
 
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter adapter;
+    private CardRecyclerViewAdapter adapter;
     private TexasModuleActivity activity;
     private Collection<Card> cards;
 
@@ -33,8 +33,13 @@ public class GetCardsDialog{
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
         recyclerView.setAdapter(adapter);
         builder.setView(recyclerView);
-        builder.setNegativeButton("CANCEL", (dialog, which) -> dialog.cancel());
-        builder.setPositiveButton("OK", (dialog, which) -> activity.approveChosenCardsInDialog());
+        builder.setNegativeButton("CANCEL", (dialog, which) -> {
+            activity.rejectChosenCardsInDialog();
+        });
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            if(adapter.getChosenCount() > 0)
+                activity.approveChosenCardsInDialog();
+        });
         /*LayoutInflater layoutInflater = activity.getLayoutInflater();
         View scrollView = layoutInflater.inflate(R.layout.getcarddialog, null);
         recyclerView = scrollView.findViewById(R.id.recyclerViewCards);

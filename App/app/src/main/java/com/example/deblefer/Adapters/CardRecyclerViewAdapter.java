@@ -26,6 +26,10 @@ public class CardRecyclerViewAdapter extends  RecyclerView.Adapter<CardRecyclerV
     private int maxCardsCount;
     private int chosen = 0;
 
+    public int getChosenCount(){
+        return chosen;
+    }
+
     public CardRecyclerViewAdapter(Activity activity, List<List<CardInDialog>> listOfFours, int maxCardsCount){
         this.activity = activity;
         this.listOfFours = listOfFours;
