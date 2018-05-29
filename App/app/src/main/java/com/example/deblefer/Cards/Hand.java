@@ -1,6 +1,4 @@
-package com.example.deblefer.Classes;
-
-import android.support.annotation.NonNull;
+package com.example.deblefer.Cards;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,7 +9,7 @@ public class Hand {
     private Card card2;
     private boolean suitIsDifferent;
 
-    Hand(Card card1, Card card2){
+    public Hand(Card card1, Card card2){
         if(card1.compareTo(card2) > 0){
             this.card1 = card1;
             this.card2 = card2;
@@ -26,7 +24,7 @@ public class Hand {
             suitIsDifferent = true;
     }
 
-    Hand(Card card1, Card card2, boolean suitIsDifferent){
+    public Hand(Card card1, Card card2, boolean suitIsDifferent){
         this.card1 = card1;
         this.card2 = card2;
         this.suitIsDifferent = suitIsDifferent;

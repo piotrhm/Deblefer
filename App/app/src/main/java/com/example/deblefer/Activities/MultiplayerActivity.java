@@ -1,11 +1,13 @@
-package com.example.deblefer;
+package com.example.deblefer.Activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.view.MenuItem;
 
-public class Multiplayer extends AppCompatActivity {
+import com.example.deblefer.R;
+
+public class MultiplayerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

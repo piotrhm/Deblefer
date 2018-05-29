@@ -1,7 +1,13 @@
-package com.example.deblefer.Classes;
+package com.example.deblefer.Statistics;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+
+import com.example.deblefer.Adapters.StatisticsViewAdapter;
+import com.example.deblefer.Cards.Card;
+import com.example.deblefer.Cards.Figure;
+import com.example.deblefer.Cards.FiguresSet;
+import com.example.deblefer.Cards.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -195,7 +201,7 @@ public class StatisticsGenerator {
             statistics.add(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards));
             if(recyclerView != null)
                 recyclerView.post(() -> {
-                    TestStatisticsViewAdapter adapter = (TestStatisticsViewAdapter)recyclerView.getAdapter();
+                    StatisticsViewAdapter adapter = (StatisticsViewAdapter)recyclerView.getAdapter();
                     adapter.addItem(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards));
                 });
         }
@@ -327,7 +333,7 @@ public class StatisticsGenerator {
             statistics.add(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards));
             if(recyclerView != null)
                 recyclerView.post(() -> {
-                    TestStatisticsViewAdapter adapter = (TestStatisticsViewAdapter)recyclerView.getAdapter();
+                    StatisticsViewAdapter adapter = (StatisticsViewAdapter)recyclerView.getAdapter();
                     adapter.addItem(new Statistics(playerFigure,chanceGetting ,chanceOfWinning,chanceOfDraw,usedCards));
                 });
 
@@ -434,7 +440,7 @@ public class StatisticsGenerator {
         statistics.add(new Statistics(playerFigure,1.0,chanceOfWinning,chanceOfDraw,usedCards));
         if(recyclerView != null)
             recyclerView.post(() -> {
-                TestStatisticsViewAdapter adapter = (TestStatisticsViewAdapter)recyclerView.getAdapter();
+                StatisticsViewAdapter adapter = (StatisticsViewAdapter)recyclerView.getAdapter();
                 adapter.addItem(new Statistics(playerFigure,1.0,chanceOfWinning,chanceOfDraw,usedCards));
             });
     }

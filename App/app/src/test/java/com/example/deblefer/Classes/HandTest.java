@@ -1,11 +1,13 @@
 package com.example.deblefer.Classes;
 
+import com.example.deblefer.Cards.Card;
+import com.example.deblefer.Cards.Deck;
+import com.example.deblefer.Cards.Hand;
+
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class HandTest {
     @Test

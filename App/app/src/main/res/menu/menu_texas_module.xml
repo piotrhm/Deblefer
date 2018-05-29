@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:app="http://schemas.android.com/apk/res-auto"
 xmlns:tools="http://schemas.android.com/tools"
-tools:context="com.example.deblefer.TexasModuleActivity">
+tools:context="com.example.deblefer.Activities.TexasModuleActivity">
     <item
         android:id="@+id/multiplayer"
         android:title="Multiplayer"

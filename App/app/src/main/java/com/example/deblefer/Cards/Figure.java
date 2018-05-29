@@ -1,4 +1,4 @@
-package com.example.deblefer.Classes;
+package com.example.deblefer.Cards;
 
 import android.support.annotation.NonNull;
 

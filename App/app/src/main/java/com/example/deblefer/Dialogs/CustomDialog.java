@@ -1,10 +1,12 @@
-package com.example.deblefer.Classes;
+package com.example.deblefer.Dialogs;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.SimpleAdapter;
 
+import com.example.deblefer.Cards.Card;
+import com.example.deblefer.Cards.Deck;
 import com.example.deblefer.R;
 
 import java.util.ArrayList;

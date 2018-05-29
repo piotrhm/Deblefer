@@ -1,4 +1,4 @@
-package com.example.deblefer.Classes;
+package com.example.deblefer.Cards;
 
 import android.content.Context;
 
@@ -14,6 +14,7 @@ public class Deck {
     private static Set<Card> cards = new HashSet<>();
     private static List<Card> listOfCards = new ArrayList<>();
     private static Map<Card, Integer> cardsImagesId = null;
+    private static List<List<Card>> fourCardsList = new ArrayList<>();
 
     static {
         for (Card.Rank rank : Card.Rank.values())
@@ -22,9 +23,6 @@ public class Deck {
 
         listOfCards.addAll(cards);
         Collections.sort(listOfCards);
-
-        if(!testHashesCode())
-            throw new RuntimeException("Card hashes are bad");
     }
     /*
     * it's likely not to be sorted (#android misteries)

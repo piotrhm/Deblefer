@@ -1,14 +1,8 @@
 package com.example.deblefer.Classes;
 
-import android.widget.ImageButton;
-
-import com.example.deblefer.R;
+import com.example.deblefer.Cards.Deck;
 
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -20,6 +14,7 @@ public class DeckTest {
                 Deck.getModifableDeckAsList().toString());
         assertTrue(Deck.getUnmodifableDeckAsList().size() == 52);
         assertTrue(Deck.testHashesCode());
+        System.out.println(Deck.getModifableFourCardsList());
         //assertEquals("c", Deck.getUnmodifableSuitAlternateDeck().toString());
     }
 

@@ -1,10 +1,8 @@
-package com.example.deblefer.Classes;
+package com.example.deblefer.Statistics;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-
-import com.example.deblefer.TexasModuleActivity;
 
 public class StatisticsSettings {
 

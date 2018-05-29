@@ -1,4 +1,4 @@
-package com.example.deblefer.Classes;
+package com.example.deblefer.Adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -7,22 +7,23 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.deblefer.Cards.Card;
+import com.example.deblefer.Cards.Deck;
+import com.example.deblefer.Statistics.Statistics;
 import com.example.deblefer.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestStatisticsViewAdapter extends RecyclerView.Adapter<TestStatisticsViewAdapter.ViewHolder> {
+public class StatisticsViewAdapter extends RecyclerView.Adapter<StatisticsViewAdapter.ViewHolder> {
 
     private List<Statistics> listOfStats;
     private Context context;
 
-    public TestStatisticsViewAdapter(List<Statistics> listOfStats) {
+    public StatisticsViewAdapter(List<Statistics> listOfStats) {
         this.listOfStats = listOfStats;
     }
 
@@ -46,7 +47,7 @@ public class TestStatisticsViewAdapter extends RecyclerView.Adapter<TestStatisti
 
     @NonNull
     @Override
-    public TestStatisticsViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public StatisticsViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View listItem= layoutInflater.inflate(R.layout.list_item, parent, false);
         return new ViewHolder(listItem);
@@ -54,7 +55,7 @@ public class TestStatisticsViewAdapter extends RecyclerView.Adapter<TestStatisti
 
     @SuppressLint({"DefaultLocale", "SetTextI18n"})
     @Override
-    public void onBindViewHolder(@NonNull TestStatisticsViewAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull StatisticsViewAdapter.ViewHolder holder, int position) {
         Statistics stat = listOfStats.get(position);
         List<Card> listOfCards = stat.getUsedCards();
         holder.textView.setText(stat.getFigure().getCategory().toString());
@@ -63,19 +64,7 @@ public class TestStatisticsViewAdapter extends RecyclerView.Adapter<TestStatisti
         int i = 0;
         for(ImageView imageView : holder.cardImages)
             imageView.setImageResource(getCardId(listOfCards, i++));
-        /*setAnimation(holder.itemView, position);*/
     }
-
-    /*private void setAnimation(View viewToAnimate, int position)
-    {
-        // If the bound view wasn't previously displayed on screen, it's animated
-        if (position > lastPosition)
-        {
-            Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
-            viewToAnimate.startAnimation(animation);
-            lastPosition = position;
-        }
-    }*/
 
     @Override
     public int getItemCount() {
@@ -94,10 +83,10 @@ public class TestStatisticsViewAdapter extends RecyclerView.Adapter<TestStatisti
 
         public ViewHolder(View itemView) {
             super(itemView);
-            cardImages.add((ImageView) itemView.findViewById(R.id.imageView));
-            cardImages.add((ImageView) itemView.findViewById(R.id.imageView2));
-            cardImages.add((ImageView) itemView.findViewById(R.id.imageView3));
-            cardImages.add((ImageView) itemView.findViewById(R.id.imageView4));
+            cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow1));
+            cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow2));
+            cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow3));
+            cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow4));
             cardImages.add((ImageView) itemView.findViewById(R.id.imageView5));
             this.textView = (TextView) itemView.findViewById(R.id.textView);
             this.textView2 = (TextView) itemView.findViewById(R.id.textView2);

@@ -1,8 +1,10 @@
 package com.example.deblefer.Classes;
 
+import com.example.deblefer.Cards.Figure;
+import com.example.deblefer.Cards.FiguresSet;
+
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;

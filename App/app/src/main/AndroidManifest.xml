@@ -12,7 +12,7 @@
         android:screenOrientation="portrait"
         >
         <activity
-            android:name=".TexasModuleActivity"
+            android:name=".Activities.TexasModuleActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
             <intent-filter>
@@ -24,11 +24,11 @@
         <activity
             android:name=".Multiplayer"
             android:label="Multiplayer"
-            android:parentActivityName=".TexasModuleActivity" />
+            android:parentActivityName=".Activities.TexasModuleActivity" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".Activities.SettingsActivity"
             android:label="Settings"
-            android:parentActivityName=".TexasModuleActivity"/>
+            android:parentActivityName=".Activities.TexasModuleActivity"/>
 
     </application>
 

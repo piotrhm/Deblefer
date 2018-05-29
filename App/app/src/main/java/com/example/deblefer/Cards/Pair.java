@@ -1,6 +1,4 @@
-package com.example.deblefer.Classes;
-
-import android.support.annotation.NonNull;
+package com.example.deblefer.Cards;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,7 +9,7 @@ public class Pair {
     private Card card1;
     private Card card2;
 
-    Pair(Card card1, Card card2){
+    public Pair(Card card1, Card card2){
         this.card1 = card1;
         this.card2 = card2;
     }

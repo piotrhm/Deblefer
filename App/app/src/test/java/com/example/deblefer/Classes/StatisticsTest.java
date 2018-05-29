@@ -1,13 +1,15 @@
 package com.example.deblefer.Classes;
 
+import com.example.deblefer.Cards.Figure;
+import com.example.deblefer.Cards.FiguresSet;
+import com.example.deblefer.Statistics.Statistics;
+
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class StatisticsTest {
     @Test

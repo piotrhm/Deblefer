@@ -1,6 +1,9 @@
-package com.example.deblefer.Classes;
+package com.example.deblefer.Statistics;
 
 import android.support.annotation.NonNull;
+
+import com.example.deblefer.Cards.Card;
+import com.example.deblefer.Cards.Figure;
 
 import java.util.ArrayList;
 import java.util.Collection;

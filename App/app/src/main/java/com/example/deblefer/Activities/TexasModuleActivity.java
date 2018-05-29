@@ -1,7 +1,6 @@
-package com.example.deblefer;
+package com.example.deblefer.Activities;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -19,15 +18,20 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.deblefer.Classes.Card;
-import com.example.deblefer.Classes.CustomDialog;
-import com.example.deblefer.Classes.Deck;
-import com.example.deblefer.Classes.HandPower;
+import com.example.deblefer.Adapters.CardRecyclerViewAdapter;
+import com.example.deblefer.Cards.Card;
+import com.example.deblefer.Cards.CardInDialog;
+import com.example.deblefer.Dialogs.CustomDialog;
+import com.example.deblefer.Cards.Deck;
+import com.example.deblefer.Dialogs.GetCardsDialog;
+import com.example.deblefer.Statistics.HandPower;
 import com.example.deblefer.Classes.PointsLoadingRunner;
-import com.example.deblefer.Classes.Statistics;
-import com.example.deblefer.Classes.StatisticsGenerator;
-import com.example.deblefer.Classes.StatisticsSettings;
-import com.example.deblefer.Classes.TestStatisticsViewAdapter;
+import com.example.deblefer.Statistics.Statistics;
+import com.example.deblefer.Statistics.StatisticsGenerator;
+import com.example.deblefer.Statistics.StatisticsSettings;
+import com.example.deblefer.Adapters.StatisticsViewAdapter;
+import com.example.deblefer.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,16 +47,19 @@ public class TexasModuleActivity extends AppCompatActivity {
     private List<ImageView> cardImages = new ArrayList<>();
     private int playersCount = 2;
 
-    private FloatingActionButton addButton;
+    private List<List<CardInDialog>> listOfFoursCards = CardInDialog.getDeckCardInDialog();
+    private StatisticsViewAdapter statisticsAdapter = new StatisticsViewAdapter(new ArrayList<>());
+
     private RecyclerView recyclerView;
-    private TestStatisticsViewAdapter recyclerAdapter = new TestStatisticsViewAdapter(new ArrayList<>());
     private TextView handPowerTextView;
     private TextView playersCountTextView;
+    private TextView pointsTextView;
     private Button addPlayerButton;
     private Button minusPlayerButton;
     private Button passButton;
     private Button randomButton;
-    private TextView pointsTextView;
+    private FloatingActionButton addCardButton;
+
 
     private class UpdateStatisticsAsync extends AsyncTask<Object[], Void, List<Statistics>>{
         Thread pointsThread;
@@ -63,7 +70,7 @@ public class TexasModuleActivity extends AppCompatActivity {
             pointsThread = new Thread(new PointsLoadingRunner(pointsTextView));
             pointsThread.start();
             setClickableButtons(false);
-            recyclerAdapter.clearItems();
+            statisticsAdapter.clearItems();
         }
 
         @Override
@@ -79,52 +86,28 @@ public class TexasModuleActivity extends AppCompatActivity {
         protected void onPostExecute(List<Statistics> statistics) {
             setClickableButtons(true);
             if(getUsedCardCount() == 7)
-                addButton.setClickable(false);
+                addCardButton.setClickable(false);
             pointsThread.interrupt();
             pointsTextView.setVisibility(View.INVISIBLE);
         }
     }
 
-    class onDialogFinishHandler implements CustomDialog.onGetCardDialogFinish{
-        Collection<Card> addedCards = null;
-
-        @Override
-        public void addCards(Collection<Card> addedCards){
-            this.addedCards = addedCards;
+    private void runUpdateStatistics(){
+        if (getUsedCardCount() == 2) {
+            setHandPower();
         }
-
-        @Override
-        public void run() {
-
-            Card card = addedCards.iterator().next();
-
-            if (card == null)
-                return;
-
-            TexasModuleActivity.this.setCardViewActive(cardImages.get(TexasModuleActivity.this.getUsedCardCount()), card);
-            deck.remove(card);
-
-            if (TexasModuleActivity.this.getUsedCardCount() < 2)
-                hand.add(card);
-            else
-                table.add(card);
-
-            if (TexasModuleActivity.this.getUsedCardCount() == 2) {
-                setHandPower();
-            }
-            else if (TexasModuleActivity.this.getUsedCardCount() == 5) {
-                new UpdateStatisticsAsync().execute();
-            }
-            else if (TexasModuleActivity.this.getUsedCardCount() == 6) {
-                new UpdateStatisticsAsync().execute();
-            }
-
-            if (TexasModuleActivity.this.getUsedCardCount() == 7) {
-                new UpdateStatisticsAsync().execute();
-                addButton.setClickable(false);
-            }
+        else if (getUsedCardCount() == 5) {
+            new UpdateStatisticsAsync().execute();
         }
-
+        else if (getUsedCardCount() == 6) {
+            new UpdateStatisticsAsync().execute();
+        }
+        else if (getUsedCardCount() == 7) {
+            new UpdateStatisticsAsync().execute();
+            addCardButton.setClickable(false);
+        }
+        else if(getUsedCardCount() > 7)
+            throw new RuntimeException("to many cards!");
     }
 
     @SuppressLint("SetTextI18n")
@@ -139,10 +122,14 @@ public class TexasModuleActivity extends AppCompatActivity {
     }
 
     private void initializeListeners(){
-        addButton.setOnClickListener(v -> {
-            CustomDialog dialog = new CustomDialog(TexasModuleActivity.this);
-            AlertDialog alertDialog = dialog.showDialog(deck, new onDialogFinishHandler());
-            alertDialog.show();
+        addCardButton.setOnClickListener(v -> {
+            int maxCardsCount = 1;
+            if (getUsedCardCount() < 2)
+                maxCardsCount = 2-getUsedCardCount();
+            else if (getUsedCardCount() < 5)
+                maxCardsCount = 5-getUsedCardCount();
+            GetCardsDialog dialog = new GetCardsDialog(this, new CardRecyclerViewAdapter(this, listOfFoursCards, maxCardsCount));
+            dialog.getDialog().show();
         });
         passButton.setOnClickListener(v -> {
             restart();
@@ -177,7 +164,7 @@ public class TexasModuleActivity extends AppCompatActivity {
             Log.println(Log.ASSERT, "XD", table.toString());
             Log.println(Log.ASSERT, "XD", Integer.toString(deck.size()) + " " + deck.toString());
 
-            new UpdateStatisticsAsync().execute();
+            runUpdateStatistics();
 
         });
     }
@@ -195,12 +182,11 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardImages.add((ImageView)findViewById(R.id.cardImageView6));
 
         recyclerView = findViewById(R.id.recyclerView);
-//      recyclerView.setHasFixedSize(true);
         recyclerView.setNestedScrollingEnabled(false);
-        recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.setAdapter(statisticsAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
 
-        addButton = findViewById(R.id.addCardButton);
+        addCardButton = findViewById(R.id.addCardButton);
         randomButton = findViewById(R.id.randomButton);
         passButton = findViewById(R.id.passButton);
         minusPlayerButton = findViewById(R.id.minusPlayerButton);
@@ -215,10 +201,11 @@ public class TexasModuleActivity extends AppCompatActivity {
         deck = Deck.getModifableDeckAsSet();
         table = new ArrayList<>();
         hand = new ArrayList<>();
+        listOfFoursCards = CardInDialog.getDeckCardInDialog();
 
         setPlayersCountTextView();
         handPowerTextView.setVisibility(View.INVISIBLE);
-        recyclerAdapter.clearItems();
+        statisticsAdapter.clearItems();
 
         setClickableButtons(true);
 
@@ -242,7 +229,6 @@ public class TexasModuleActivity extends AppCompatActivity {
     }
 
     private void setCardViewActive(ImageView cardView, Card card){
-//        cardView.setAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide));
         cardView.setImageResource(Deck.getCardImageId(card));
     }
 
@@ -250,6 +236,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         cardView.setImageResource(R.drawable.unused);
     }
 
+    @SuppressLint("SetTextI18n")
     private void setPlayersCountTextView(){
         playersCountTextView.setText("players:\n" + playersCount);
     }
@@ -274,10 +261,10 @@ public class TexasModuleActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()){
             case R.id.multiplayer:
-                this.startActivity(new Intent(this,Multiplayer.class));
+                this.startActivity(new Intent(this, MultiplayerActivity.class));
                 return true;
             case R.id.settings:
-                this.startActivity(new Intent(this,SettingsActivity.class));
+                this.startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             case R.id.exit:
                 finish();
@@ -286,8 +273,30 @@ public class TexasModuleActivity extends AppCompatActivity {
         }
     }
 
-    public void setClickableButtons(boolean clickable){
-        addButton.setClickable(clickable);
+    public void approveChosenCardsInDialog(){
+        for(List<CardInDialog> lists : listOfFoursCards){
+            for(CardInDialog cardInDialog : lists){
+                if(cardInDialog.isChosen()){
+                    addCardToProperSet(cardInDialog.getCard());
+                    cardInDialog.setUsed(true);
+                }
+                cardInDialog.setChosen(false);
+            }
+        }
+        runUpdateStatistics();
+    }
+
+    private void addCardToProperSet(Card card){
+        if(getUsedCardCount() < 2)
+            hand.add(card);
+        else
+            table.add(card);
+        Picasso.with(this).load(Deck.getCardImageId(card)).noFade().into(cardImages.get(getUsedCardCount()-1));
+        deck.remove(card);
+    }
+
+    private void setClickableButtons(boolean clickable){
+        addCardButton.setClickable(clickable);
         addPlayerButton.setClickable(clickable);
         minusPlayerButton.setClickable(clickable);
         passButton.setClickable(clickable);

@@ -1,8 +1,10 @@
-package com.example.deblefer;
+package com.example.deblefer.Activities;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
+
+import com.example.deblefer.R;
 
 public class SettingsActivity extends AppCompatActivity {
 
