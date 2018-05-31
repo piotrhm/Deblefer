@@ -56,8 +56,6 @@ public class Deck {
     static class UninitializedArrayException extends RuntimeException{}
 
     public static int getCardImageId(Card card){
-        if(cardsImagesId == null)
-            throw new UninitializedArrayException();
         return cardsImagesId.get(card);
     }
 

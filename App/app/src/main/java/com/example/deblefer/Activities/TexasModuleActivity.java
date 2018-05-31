@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.deblefer.Adapters.CardRecyclerViewAdapter;
+import com.example.deblefer.Adapters.CardRecyclerViewAdapterImproved;
 import com.example.deblefer.Cards.Card;
 import com.example.deblefer.Cards.CardInDialog;
 import com.example.deblefer.Dialogs.CustomDialog;
@@ -47,7 +49,8 @@ public class TexasModuleActivity extends AppCompatActivity {
     private List<ImageView> cardImages = new ArrayList<>();
     private int playersCount = 2;
 
-    private List<List<CardInDialog>> listOfFoursCards = CardInDialog.getDeckCardInDialog();
+    private List<List<CardInDialog>> listOfFoursCards = new ArrayList<>();
+    private List<CardInDialog> listOfCardsInDialog = CardInDialog.getDeckCardInDialog();
     private StatisticsViewAdapter statisticsAdapter = new StatisticsViewAdapter(new ArrayList<>());
 
     private RecyclerView recyclerView;
@@ -96,18 +99,14 @@ public class TexasModuleActivity extends AppCompatActivity {
         if (getUsedCardCount() == 2) {
             setHandPower();
         }
-        else if (getUsedCardCount() == 5) {
+        else if (getUsedCardCount() <= 7)
             new UpdateStatisticsAsync().execute();
-        }
-        else if (getUsedCardCount() == 6) {
-            new UpdateStatisticsAsync().execute();
-        }
-        else if (getUsedCardCount() == 7) {
-            new UpdateStatisticsAsync().execute();
-            addCardButton.setClickable(false);
-        }
-        else if(getUsedCardCount() > 7)
+        else
             throw new RuntimeException("to many cards!");
+
+        if (getUsedCardCount() == 7)
+            addCardButton.setClickable(false);
+
     }
 
     @SuppressLint("SetTextI18n")
@@ -128,7 +127,7 @@ public class TexasModuleActivity extends AppCompatActivity {
                 maxCardsCount = 2-getUsedCardCount();
             else if (getUsedCardCount() < 5)
                 maxCardsCount = 5-getUsedCardCount();
-            GetCardsDialog dialog = new GetCardsDialog(this, new CardRecyclerViewAdapter(this, listOfFoursCards, maxCardsCount));
+            GetCardsDialog dialog = new GetCardsDialog(this, new CardRecyclerViewAdapterImproved(this, listOfCardsInDialog , maxCardsCount));
             dialog.getDialog().show();
         });
         passButton.setOnClickListener(v -> {
@@ -201,8 +200,8 @@ public class TexasModuleActivity extends AppCompatActivity {
         deck = Deck.getModifableDeckAsSet();
         table = new ArrayList<>();
         hand = new ArrayList<>();
-        listOfFoursCards = CardInDialog.getDeckCardInDialog();
-
+//        listOfFoursCards = CardInDialog.getDeckCardInDialog();
+        listOfCardsInDialog = CardInDialog.getDeckCardInDialog();
         setPlayersCountTextView();
         handPowerTextView.setVisibility(View.INVISIBLE);
         statisticsAdapter.clearItems();
@@ -274,7 +273,7 @@ public class TexasModuleActivity extends AppCompatActivity {
     }
 
     public void approveChosenCardsInDialog(){
-        for(List<CardInDialog> lists : listOfFoursCards){
+        /*for(List<CardInDialog> lists : listOfFoursCards){
             for(CardInDialog cardInDialog : lists){
                 if(cardInDialog.isChosen()){
                     addCardToProperSet(cardInDialog.getCard());
@@ -282,14 +281,20 @@ public class TexasModuleActivity extends AppCompatActivity {
                 }
                 cardInDialog.setChosen(false);
             }
+        }*/
+        for(CardInDialog cardInDialog : listOfCardsInDialog){
+            if(cardInDialog.isChosen()){
+                addCardToProperSet(cardInDialog.getCard());
+                cardInDialog.setUsed(true);
+            }
+            cardInDialog.setChosen(false);
         }
         runUpdateStatistics();
     }
 
     public void rejectChosenCardsInDialog(){
-        for(List<CardInDialog> lists : listOfFoursCards)
-            for(CardInDialog cardInDialog : lists)
-                cardInDialog.setChosen(false);
+        for(CardInDialog cardInDialog : listOfCardsInDialog)
+            cardInDialog.setChosen(false);
     }
 
     private void addCardToProperSet(Card card){

@@ -32,14 +32,18 @@ public class CardInDialog {
         this.used = used;
     }
 
-    public static List<List<CardInDialog>> getDeckCardInDialog(){
-        List<List<CardInDialog>> fourCardsList = new ArrayList<>();
+    public static List<CardInDialog> getDeckCardInDialog() {
+        /*List<List<CardInDialog>> fourCardsList = new ArrayList<>();
         for(Card.Rank rank : Card.Rank.values()){
             List<CardInDialog> cards1 = new ArrayList<>();
             for(Card.Suit suit : Card.Suit.values())
                 cards1.add(new CardInDialog(new Card(rank, suit)));
             fourCardsList.add(cards1);
-        }
-        return fourCardsList;
+        }*/
+        List<CardInDialog> list = new ArrayList<>();
+        for(Card card : Deck.getModifableDeckAsList())
+                list.add(new CardInDialog(card));
+
+        return list;
     }
 }

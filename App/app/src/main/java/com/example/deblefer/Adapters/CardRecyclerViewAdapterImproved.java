@@ -1,6 +1,7 @@
 package com.example.deblefer.Adapters;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,9 +20,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CardRecyclerViewAdapter extends  RecyclerView.Adapter<CardRecyclerViewAdapter.ViewHolder>{
+public class CardRecyclerViewAdapterImproved extends  RecyclerView.Adapter<CardRecyclerViewAdapterImproved.ViewHolder>{
 
-    private List<List<CardInDialog>> listOfFours;
+    private List<CardInDialog> listOfCards;
     private Activity activity;
     private int maxCardsCount;
     private int chosen = 0;
@@ -30,32 +31,28 @@ public class CardRecyclerViewAdapter extends  RecyclerView.Adapter<CardRecyclerV
         return chosen;
     }
 
-    public CardRecyclerViewAdapter(Activity activity, List<List<CardInDialog>> listOfFours, int maxCardsCount){
+    public CardRecyclerViewAdapterImproved(Activity activity, List<CardInDialog> listOfCardsInDialog, int maxCardsCount){
         this.activity = activity;
-        this.listOfFours = listOfFours;
+        this.listOfCards = listOfCardsInDialog;
         this.maxCardsCount = maxCardsCount;
     }
 
     @NonNull
     @Override
-    public CardRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CardRecyclerViewAdapterImproved.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View listItem = layoutInflater.inflate(R.layout.cards_row, parent, false);
-        return new CardRecyclerViewAdapter.ViewHolder(listItem);
+        View listItem = layoutInflater.inflate(R.layout.card_image_row, parent, false);
+        return new CardRecyclerViewAdapterImproved.ViewHolder(listItem);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CardRecyclerViewAdapter.ViewHolder holder, int position) {
-        List<CardInDialog> cards = listOfFours.get(position);
-        int i = 0;
-        for (ImageView cardImage : holder.cardImages){
-            CardInDialog cardInDialog = cards.get(i++);
-
-            if (cardInDialog.isUsed()){
-                Picasso.with(activity).load(R.drawable.unused).noFade().into(cardImage);
-                continue;
-            }
-
+    public void onBindViewHolder(@NonNull CardRecyclerViewAdapterImproved.ViewHolder holder, int position) {
+        CardInDialog cardInDialog = listOfCards.get(position);
+        ImageView cardImage = holder.cardImage;
+        if (cardInDialog.isUsed()){
+            Picasso.with(activity).load(R.drawable.unused).noFade().into(cardImage);
+        }
+        else {
             Picasso.with(activity).load(Deck.getCardImageId(cardInDialog.getCard())).noFade().into(cardImage);
             cardImage.setOnClickListener(v -> onClick(cardInDialog, cardImage));
         }
@@ -69,7 +66,7 @@ public class CardRecyclerViewAdapter extends  RecyclerView.Adapter<CardRecyclerV
         float scale = 1.0f;
         cardInDialog.setChosen(!cardInDialog.isChosen());
         if(cardInDialog.isChosen()){
-            scale = 1.1f;
+            scale = 1.15f;
             chosen++;
         }
         else
@@ -80,18 +77,15 @@ public class CardRecyclerViewAdapter extends  RecyclerView.Adapter<CardRecyclerV
 
     @Override
     public int getItemCount() {
-        return listOfFours.size();
+        return listOfCards.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        List<ImageView> cardImages = new ArrayList<>();
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView cardImage;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow1));
-            cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow2));
-            cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow3));
-            cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow4));
+            cardImage = itemView.findViewById(R.id.justCard);
         }
     }
 }
