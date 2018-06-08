@@ -26,6 +26,7 @@ import com.example.deblefer.Cards.CardInDialog;
 import com.example.deblefer.Dialogs.CustomDialog;
 import com.example.deblefer.Cards.Deck;
 import com.example.deblefer.Dialogs.GetCardsDialog;
+import com.example.deblefer.Multiplayer.LogIn;
 import com.example.deblefer.Statistics.HandPower;
 import com.example.deblefer.Classes.PointsLoadingRunner;
 import com.example.deblefer.Statistics.Statistics;
@@ -260,7 +261,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()){
             case R.id.multiplayer:
-                this.startActivity(new Intent(this, MultiplayerActivity.class));
+                this.startActivity(new Intent(this, LogIn.class));
                 return true;
             case R.id.settings:
                 this.startActivity(new Intent(this, SettingsActivity.class));
