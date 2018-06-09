@@ -49,7 +49,6 @@ public class TexasModuleActivity extends AppCompatActivity {
     private List<ImageView> cardImages = new ArrayList<>();
     private int playersCount = 2;
 
-    private List<List<CardInDialog>> listOfFoursCards = new ArrayList<>();
     private List<CardInDialog> listOfCardsInDialog = CardInDialog.getDeckCardInDialog();
     private StatisticsViewAdapter statisticsAdapter = new StatisticsViewAdapter(new ArrayList<>());
 
@@ -200,7 +199,6 @@ public class TexasModuleActivity extends AppCompatActivity {
         deck = Deck.getModifableDeckAsSet();
         table = new ArrayList<>();
         hand = new ArrayList<>();
-//        listOfFoursCards = CardInDialog.getDeckCardInDialog();
         listOfCardsInDialog = CardInDialog.getDeckCardInDialog();
         setPlayersCountTextView();
         handPowerTextView.setVisibility(View.INVISIBLE);
@@ -273,15 +271,6 @@ public class TexasModuleActivity extends AppCompatActivity {
     }
 
     public void approveChosenCardsInDialog(){
-        /*for(List<CardInDialog> lists : listOfFoursCards){
-            for(CardInDialog cardInDialog : lists){
-                if(cardInDialog.isChosen()){
-                    addCardToProperSet(cardInDialog.getCard());
-                    cardInDialog.setUsed(true);
-                }
-                cardInDialog.setChosen(false);
-            }
-        }*/
         for(CardInDialog cardInDialog : listOfCardsInDialog){
             if(cardInDialog.isChosen()){
                 addCardToProperSet(cardInDialog.getCard());

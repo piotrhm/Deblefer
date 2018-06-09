@@ -24,34 +24,22 @@ public class Deck {
         listOfCards.addAll(cards);
         Collections.sort(listOfCards);
     }
-    /*
-    * it's likely not to be sorted (#android misteries)
-    * */
+
     public static Set<Card> getUnmodifableDeckAsSet(){
         return Collections.unmodifiableSet(cards);
     }
-    /*
-     * it's likely not to be sorted (#android misteries)
-     * */
+
     public static Set<Card> getModifableDeckAsSet(){
         return new HashSet<>(cards);
     }
-    /*
-     * it's sorted as sorted array can be
-     * */
+
     public static List<Card> getUnmodifableDeckAsList(){
         return Collections.unmodifiableList(listOfCards);
     }
-    /*
-     * it's sorted as sorted array can be
-     * */
+
     public static List<Card> getModifableDeckAsList(){
         return new ArrayList<>(listOfCards);
     }
-
-    /*
-    * moze sie przydac
-    * */
 
     static class UninitializedArrayException extends RuntimeException{}
 
@@ -68,20 +56,4 @@ public class Deck {
 
     }
 
-    public static Map<Card, Integer> getCardsImagesId() {
-        return cardsImagesId;
-    }
-
-    static boolean testHashesCode(){
-        ArrayList<Integer> hashes = new ArrayList<>();
-        for(Card.Rank rank : Card.Rank.values()){
-            for(Card.Suit suit : Card.Suit.values()){
-                Card card = new Card(rank, suit);
-                if(hashes.contains(card.hashCode()))
-                    return false;
-                hashes.add(card.hashCode());
-            }
-        }
-        return true;
-    }
 }

@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.deblefer">
 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,26 +13,44 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:screenOrientation="portrait"
-        >
+        android:screenOrientation="portrait">
         <activity
             android:name=".Activities.TexasModuleActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme">
+            android:configChanges="orientation"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait">
+
+        </activity>
+        <activity
+            android:name=".Activities.SplashScreen"
+            android:configChanges="orientation"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Multiplayer"
+
+       <activity
+            android:name=".Multiplayer.LogIn"
             android:label="Multiplayer"
-            android:parentActivityName=".Activities.TexasModuleActivity" />
-        <activity
-            android:name=".Activities.SettingsActivity"
-            android:label="Settings"
-            android:parentActivityName=".Activities.TexasModuleActivity"/>
+            android:screenOrientation="portrait"
+            android:parentActivityName=".Activities.TexasModuleActivity" >
+       </activity>
+
+        <activity android:name=".Multiplayer.MultiplayerTable" />
+        <activity android:name=".Multiplayer.BluetoothChat"
+            android:parentActivityName=".Multiplayer.LogIn"
+            />
+        <activity android:name=".Multiplayer.DeviceListActivity"
+            android:parentActivityName=".Multiplayer.LogIn"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="Select device"
+            android:theme="@android:style/Theme.Dialog" />
+            />
+        <activity android:name=".Activities.SettingsActivity"
+            android:parentActivityName=".Activities.TexasModuleActivity"
+            />
 
     </application>
 

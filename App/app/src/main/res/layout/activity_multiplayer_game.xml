@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Multiplayer.MultiplayerGame"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/cardImageView1"
+        android:layout_width="60dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toEndOf="@+id/cardImageView0"
+        app:layout_constraintTop_toBottomOf="@+id/cardImageView4"
+        app:srcCompat="@drawable/unused" />
+
+    <ImageView
+        android:id="@+id/cardImageView0"
+        android:layout_width="60dp"
+        android:layout_height="75dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toStartOf="@+id/cardImageView1"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardImageView2"
+        app:srcCompat="@drawable/unused"
+        tools:ignore="MissingConstraints" />
+
+    <ImageView
+        android:id="@+id/cardImageView6"
+        android:layout_width="60dp"
+        android:layout_height="75dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.885"
+        app:layout_constraintStart_toEndOf="@+id/cardImageView5"
+app:layout_constraintTop_toTopOf="parent"
+    app:srcCompat="@drawable/unused"
+    tools:ignore="MissingConstraints" />
+
+<ImageView
+    android:id="@+id/cardImageView5"
+    android:layout_width="60dp"
+    android:layout_height="75dp"
+    android:layout_marginTop="32dp"
+    app:layout_constraintEnd_toStartOf="@+id/cardImageView6"
+    app:layout_constraintStart_toEndOf="@+id/cardImageView4"
+    app:layout_constraintTop_toTopOf="parent"
+    app:srcCompat="@drawable/unused"
+    tools:ignore="MissingConstraints" />
+
+<ImageView
+android:id="@+id/cardImageView4"
+android:layout_width="60dp"
+android:layout_height="75dp"
+android:layout_marginTop="32dp"
+app:layout_constraintEnd_toStartOf="@+id/cardImageView5"
+app:layout_constraintStart_toEndOf="@+id/cardImageView3"
+app:layout_constraintTop_toTopOf="parent"
+app:srcCompat="@drawable/unused"
+tools:ignore="MissingConstraints" />
+
+<ImageView
+android:id="@+id/cardImageView3"
+android:layout_width="60dp"
+android:layout_height="75dp"
+android:layout_marginTop="32dp"
+app:layout_constraintEnd_toStartOf="@+id/cardImageView4"
+app:layout_constraintStart_toEndOf="@+id/cardImageView2"
+app:layout_constraintTop_toTopOf="parent"
+app:srcCompat="@drawable/unused"
+tools:ignore="MissingConstraints" />
+<ImageView
+    android:id="@+id/cardImageView2"
+    android:layout_width="60dp"
+    android:layout_height="75dp"
+    android:layout_marginLeft="60dp"
+    android:layout_marginStart="60dp"
+    android:layout_marginTop="32dp"
+    app:layout_constraintEnd_toStartOf="@+id/cardImageView3"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:srcCompat="@drawable/unused" />
+
+<Button
+android:id="@+id/button"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginBottom="315dp"
+android:layout_marginEnd="63dp"
+android:layout_marginStart="53dp"
+android:layout_marginTop="41dp"
+android:text="TEST"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintStart_toEndOf="@+id/cardImageView1"
+app:layout_constraintTop_toBottomOf="@+id/cardImageView6" />
+
+<TextView
+android:id="@+id/testCounter"
+android:layout_width="87dp"
+android:layout_height="81dp"
+android:layout_marginBottom="168dp"
+android:layout_marginEnd="213dp"
+android:layout_marginStart="84dp"
+android:layout_marginTop="56dp"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toBottomOf="@+id/cardImageView1" />
+
+    </android.support.constraint.ConstraintLayout>

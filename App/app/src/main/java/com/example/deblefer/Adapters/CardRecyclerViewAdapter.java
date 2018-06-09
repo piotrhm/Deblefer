@@ -19,6 +19,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class CardRecyclerViewAdapter extends  RecyclerView.Adapter<CardRecyclerViewAdapter.ViewHolder>{
 
     private List<List<CardInDialog>> listOfFours;
