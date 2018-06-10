@@ -83,7 +83,7 @@ public class CardRecyclerViewAdapterImproved extends  RecyclerView.Adapter<CardR
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView cardImage;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             cardImage = itemView.findViewById(R.id.justCard);
         }

@@ -1,7 +1,6 @@
 package com.example.deblefer.Statistics;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
 import com.example.deblefer.Adapters.StatisticsViewAdapter;
 import com.example.deblefer.Cards.Card;
@@ -20,6 +19,7 @@ import java.util.Set;
 
 public class StatisticsGenerator {
 
+    private volatile boolean interrupted = false;
     private int players;
     private Collection<Card> hand;
     private Collection<Card> table;
@@ -28,33 +28,121 @@ public class StatisticsGenerator {
     private StatisticsSettings statisticsSettings;
     private RecyclerView recyclerView;
 
+    public void interrupt(){
+        interrupted = true;
+    }
+
+    public static class StatisticsGeneratorBox{
+        private StatisticsGenerator generator;
+        public StatisticsGeneratorBox(Collection<Card> hand, Collection<Card> table, Collection<Card> unused, int players,
+                               StatisticsSettings statisticsSettings, RecyclerView statisticsRecyclerView){
+            generator = new StatisticsGenerator(players, hand, table, unused, statisticsSettings, statisticsRecyclerView);
+        }
+        public List<Statistics> getStatistics() throws InterruptedException {
+            generator.generateStatistics();
+            return generator.statistics;
+        }
+        public void interrupt(){
+            generator.interrupt();
+        }
+    }
+
+    public static Double getChanceOfWinning(List<Statistics> statisticsList){
+        Double result = 0.0;
+        for(Statistics stat : statisticsList)
+            result += stat.getChanceOfGettingAsHighest()*stat.getChanceOfWinning();
+        return result;
+    }
+
+    private Double getChanceOfGetting(Figure figure, Collection<Card> usedCards){
+        List<Integer> counts = new ArrayList<>();
+        if(figure.getCategory() == Figure.Category.STRAIGHT_FLUSH){
+            Collection<Card> needed = new HashSet<>(usedCards);
+            needed.retainAll(unused);
+            if(needed.size() == 0)
+                return 1.0;
+            if(needed.size() > 2)
+                return 0.0;
+            for(Card card : needed)
+                counts.add(1);
+        }
+        else if(figure.getCategory() == Figure.Category.FLUSH){
+            Card.Suit suit = usedCards.iterator().next().getSuit();
+            int count = 0;
+            for (Card card : unused)
+                if (card.getSuit().equals(suit))
+                    count++;
+            if(count <= 8)
+                return 1.0;
+            if(count > 10)
+                return 0.0;
+            counts.add(count);
+            if(count == 10)
+                counts.add(count-1);
+        }
+        else
+        {
+            /*
+            * do streamów potrzebne jest wysokie API ;_;
+            * */
+            List<Card> playerCards = new ArrayList<>(hand);
+            playerCards.addAll(table);
+            List<Card.Rank> playersRanks = new ArrayList<>();
+            List<Card.Rank> needed = new ArrayList<>();
+            for (Card card : playerCards)
+                playersRanks.add(card.getRank());
+            for (Card.Rank rank : figure.getRanks()){
+                if(!playersRanks.remove(rank))
+                    needed.add(rank);
+            }
+            if(needed.size() == 0)
+                return 1.0;
+            if(needed.size() > 2)
+                return 0.0;
+
+            if(needed.size() == 2 && needed.get(0).equals(needed.get(1))){
+                counts.add(getUnusedRankCount(needed.get(0)));
+                counts.add(counts.get(0)-1);
+            }
+            else {
+                for(Card.Rank rank : needed)
+                    counts.add(getUnusedRankCount(rank));
+            }
+        }
+
+        Double res = 1.0;
+        for (Integer i : counts)
+            res *= (2.0*i)/unused.size();
+        return res/counts.size();
+    }
+
+    private int getUnusedRankCount(Card.Rank rank){
+        int count = 0;
+        for (Card card : unused)
+            if(card.getRank().equals(rank))
+                count++;
+        return count;
+    }
+
     private StatisticsGenerator(int players, Collection<Card> hand, Collection<Card> table,
-                                Collection<Card> unused, StatisticsSettings statisticsSettings, RecyclerView recyclerView){
+                                Collection<Card> unused, StatisticsSettings statisticsSettings,
+                                RecyclerView recyclerView){
         this.players = players;
         this.hand = new HashSet<>(hand);
         this.table = new HashSet<>(table);
         this.unused = new HashSet<>(unused);
         this.statisticsSettings=statisticsSettings;
         this.recyclerView = recyclerView;
-
-        Log.println(Log.ASSERT, "XD", hand.toString());
-        Log.println(Log.ASSERT, "XD", table.toString());
-        Log.println(Log.ASSERT, "XD", Integer.toString(unused.size()) + " " + unused.toString());
     }
 
-    public static List<Statistics> getStatistics(Collection<Card> hand, Collection<Card> table, Collection<Card> unused,
-                                                 int players, StatisticsSettings statisticsSettings){
-        return getStatistics(hand, table, unused, players, statisticsSettings, null);
-    }
-
-    public static List<Statistics> getStatistics(Collection<Card> hand, Collection<Card> table, Collection<Card> unused, int players,
-                                                 StatisticsSettings statisticsSettings, RecyclerView statisticsRecyclerView){
+   /* public static List<Statistics> getStatistics(Collection<Card> hand, Collection<Card> table, Collection<Card> unused, int players,
+                                                 StatisticsSettings statisticsSettings, RecyclerView statisticsRecyclerView) throws InterruptedException {
         StatisticsGenerator generator = new StatisticsGenerator(players, hand, table, unused, statisticsSettings, statisticsRecyclerView);
         generator.generateStatistics();
         return generator.statistics;
-    }
+    }*/
 
-    private void generateStatistics(){
+    private void generateStatistics() throws InterruptedException {
         switch (table.size()){
             case 0: beforeFlop(); break;
             case 3: afterFlop(); break;
@@ -67,7 +155,7 @@ public class StatisticsGenerator {
         //previously generated statistics for every Pair
     }
 
-    private void afterFlop() {
+    private void afterFlop() throws InterruptedException {
         Set<Card> playerCards = new HashSet<>(hand); playerCards.addAll(table);
         Set<Card> unusedCards = new HashSet<>(unused);
 
@@ -79,7 +167,8 @@ public class StatisticsGenerator {
 
         for(int figureIndex = 0 ;figureIndex<sortedFigures.size() && !allPairsForPlayer.isEmpty();figureIndex++){
             Figure playerFigure = sortedFigures.get(figureIndex);
-
+            if(interrupted)
+                throw new InterruptedException();
             if( statisticsSettings.isDrawWhenSameFigure()){
                 List<Card> handList = new ArrayList<>(hand);
                 if(playerFigure.getCategory()!= Figure.Category.FLUSH){
@@ -116,7 +205,6 @@ public class StatisticsGenerator {
             Set<Card> oneOfNeededPairs = new HashSet<>(it.next().getCards());
 
             for(Pair neededPair : neededPairsForPlayer){
-
                 playerCards.addAll(neededPair.getCards());
                 unusedCards.removeAll(neededPair.getCards());
                 Set<Pair> allPairsForOpponent = new HashSet<>(PairGenerator(unusedCards));
@@ -125,6 +213,8 @@ public class StatisticsGenerator {
 
                 //wins
                 for(int i = 0 ; i< figureIndex && !allPairsForOpponent.isEmpty() ; i++){
+                    if(interrupted)
+                        throw new InterruptedException();
                     Figure opponentFigure =sortedFigures.get(i);
                     Set<Card> opponentCards = new HashSet<>(table);
                     opponentCards.addAll(neededPair.getCards());
@@ -141,6 +231,8 @@ public class StatisticsGenerator {
                     opponentCards.addAll(neededPair.getCards());
                     Set<Pair> neededPairs = neededPairs(opponentCards, playerFigure, allPairsForOpponent);
                     for (Pair pair : neededPairs) {
+                        if(interrupted)
+                            throw new InterruptedException();
                         opponentCards.addAll(pair.getCards());
                         int result = flushResult(playerCards, opponentCards);
                         if (result < 0) loosingAfterDraw++;
@@ -162,7 +254,8 @@ public class StatisticsGenerator {
                             Collections.sort(drawPlayer, Collections.reverseOrder());
 
                             for (Pair pair : neededPairs) {
-
+                                if(interrupted)
+                                    throw new InterruptedException();
                                 List<Card.Rank> drawOpponent = new ArrayList<>(getRanks(opponentCards));
                                 drawOpponent.addAll(getRanks(pair.getCards()));
                                 for (Card.Rank rank : playerFigure.getRanks()) drawOpponent.remove(rank);
@@ -202,12 +295,12 @@ public class StatisticsGenerator {
             if(recyclerView != null)
                 recyclerView.post(() -> {
                     StatisticsViewAdapter adapter = (StatisticsViewAdapter)recyclerView.getAdapter();
-                    adapter.addItem(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards));
+                    adapter.addItem(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards).setChanceToGet(getChanceOfGetting(playerFigure, usedCards)));
                 });
         }
     }
 
-    private void afterTurn() {
+    private void afterTurn() throws InterruptedException {
 
         Set<Card> playerCards = new HashSet<>(hand); playerCards.addAll(table);
         Set<Card> unusedCards = new HashSet<>(unused);
@@ -219,7 +312,8 @@ public class StatisticsGenerator {
         long allGettingCombinations = allCardsForPlayer.size();
 
         for(int figureIndex=0;figureIndex<sortedFigures.size() && !allCardsForPlayer.isEmpty();figureIndex++){
-
+            if(interrupted)
+                throw new InterruptedException();
             Figure playerFigure = sortedFigures.get(figureIndex);
 
             if(statisticsSettings.isDrawWhenSameFigure() ){
@@ -266,6 +360,8 @@ public class StatisticsGenerator {
 
                 //wins
                 for(int i = 0; i<figureIndex && !allPairsForOpponent.isEmpty();i++){
+                    if(interrupted)
+                        throw new InterruptedException();
                     Figure opponentFigure =sortedFigures.get(i);
                     Set<Card> opponentCards = new HashSet<>(table);
                     opponentCards.add(neededCard);
@@ -281,6 +377,8 @@ public class StatisticsGenerator {
                 //FLUSH exeception
                 if(playerFigure.getCategory()== Figure.Category.FLUSH){
                     for (Pair pair : neededPairs) {
+                        if(interrupted)
+                            throw new InterruptedException();
                         opponentCards.addAll(pair.getCards());
                         int result = flushResult(playerCards, opponentCards);
                         if (result < 0) loosingAfterDraw++;
@@ -297,7 +395,8 @@ public class StatisticsGenerator {
                             Collections.sort(drawPlayer, Collections.reverseOrder());
 
                             for (Pair pair : neededPairs) {
-
+                                if(interrupted)
+                                    throw new InterruptedException();
                                 List<Card.Rank> drawOpponent = new ArrayList<>(getRanks(table));
                                 drawOpponent.add(neededCard.getRank());
                                 drawOpponent.addAll(getRanks(pair.getCards()));
@@ -306,6 +405,8 @@ public class StatisticsGenerator {
 
                                 int cardNumber = 0;
                                 for (; cardNumber < 5 - playerFigure.getRanks().size(); cardNumber++) {
+                                    if(interrupted)
+                                        throw new InterruptedException();
                                     if (!drawPlayer.get(cardNumber).equals(drawOpponent.get(cardNumber))) {
                                         if (drawPlayer.get(cardNumber).getPower() > drawOpponent.get(cardNumber).getPower()) {
                                             loosingAfterDraw++;
@@ -334,13 +435,13 @@ public class StatisticsGenerator {
             if(recyclerView != null)
                 recyclerView.post(() -> {
                     StatisticsViewAdapter adapter = (StatisticsViewAdapter)recyclerView.getAdapter();
-                    adapter.addItem(new Statistics(playerFigure,chanceGetting ,chanceOfWinning,chanceOfDraw,usedCards));
+                    adapter.addItem(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards).setChanceToGet(getChanceOfGetting(playerFigure, usedCards)));
                 });
 
         }
     }
 
-    private void afterRiver() {
+    private void afterRiver() throws InterruptedException {
 
         Set<Card> playerCards = new HashSet<>(hand); playerCards.addAll(table);
 
@@ -380,6 +481,8 @@ public class StatisticsGenerator {
 
         //wins
         for(int i = 0; i<figureIndex && !allPairsForOpponent.isEmpty();i++){
+            if(interrupted)
+                throw new InterruptedException();
             Figure opponentFigure = sortedFigures.get(i);
             Set<Card> opponentCards = new HashSet<>(table);
             neededPairsRemove(opponentCards,opponentFigure,allPairsForOpponent);
@@ -441,7 +544,7 @@ public class StatisticsGenerator {
         if(recyclerView != null)
             recyclerView.post(() -> {
                 StatisticsViewAdapter adapter = (StatisticsViewAdapter)recyclerView.getAdapter();
-                adapter.addItem(new Statistics(playerFigure,1.0,chanceOfWinning,chanceOfDraw,usedCards));
+                adapter.addItem(new Statistics(playerFigure,1.0,chanceOfWinning,chanceOfDraw,usedCards).setChanceToGet(getChanceOfGetting(playerFigure, usedCards)));
             });
     }
 

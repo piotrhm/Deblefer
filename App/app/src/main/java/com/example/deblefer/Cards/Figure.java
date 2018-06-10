@@ -26,15 +26,15 @@ public class Figure implements Comparable<Figure>{
         @Override
         public String toString() {
             switch (this){
-                case HIGH_CARD: return "HIGH CARD";
-                case ONE_PAIR: return "ONE PAIR";
-                case TWO_PAIR: return "TWO PAIR";
-                case THREE_OF_A_KIND: return "THREE OF A KIND";
-                case STRAIGHT: return "STRAIGHT";
-                case FLUSH: return "FLUSH";
-                case FULL_HOUSE: return "FULL HOUSE";
-                case FOUR_OF_A_KIND: return "FOUR OF A KIND";
-                case STRAIGHT_FLUSH: return "STRAIGHT FLUSH";
+                case HIGH_CARD: return "High Card";
+                case ONE_PAIR: return "One Pair";
+                case TWO_PAIR: return "Two Pair";
+                case THREE_OF_A_KIND: return "Three of a Kind";
+                case STRAIGHT: return "Straight";
+                case FLUSH: return "Flush";
+                case FULL_HOUSE: return "Full House";
+                case FOUR_OF_A_KIND: return "Four of a Kind";
+                case STRAIGHT_FLUSH: return "Straight Flush";
             }
             return null;
         }

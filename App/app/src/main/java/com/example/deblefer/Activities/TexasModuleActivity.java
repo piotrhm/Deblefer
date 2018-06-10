@@ -1,12 +1,14 @@
 package com.example.deblefer.Activities;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,9 +25,11 @@ import com.example.deblefer.Adapters.CardRecyclerViewAdapter;
 import com.example.deblefer.Adapters.CardRecyclerViewAdapterImproved;
 import com.example.deblefer.Cards.Card;
 import com.example.deblefer.Cards.CardInDialog;
+import com.example.deblefer.Classes.PointsThread;
 import com.example.deblefer.Dialogs.CustomDialog;
 import com.example.deblefer.Cards.Deck;
 import com.example.deblefer.Dialogs.GetCardsDialog;
+import com.example.deblefer.Multiplayer.LogIn;
 import com.example.deblefer.Statistics.HandPower;
 import com.example.deblefer.Classes.PointsLoadingRunner;
 import com.example.deblefer.Statistics.Statistics;
@@ -41,6 +45,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import static com.example.deblefer.Statistics.StatisticsGenerator.getChanceOfWinning;
+
 public class TexasModuleActivity extends AppCompatActivity {
 
     private Collection<Card> deck = Deck.getModifableDeckAsSet();
@@ -50,7 +56,7 @@ public class TexasModuleActivity extends AppCompatActivity {
     private int playersCount = 2;
 
     private List<CardInDialog> listOfCardsInDialog = CardInDialog.getDeckCardInDialog();
-    private StatisticsViewAdapter statisticsAdapter = new StatisticsViewAdapter(new ArrayList<>());
+    private StatisticsViewAdapter statisticsAdapter = new StatisticsViewAdapter(new ArrayList<>(), this);
 
     private RecyclerView recyclerView;
     private TextView handPowerTextView;
@@ -62,14 +68,21 @@ public class TexasModuleActivity extends AppCompatActivity {
     private Button randomButton;
     private FloatingActionButton addCardButton;
 
-
     private class UpdateStatisticsAsync extends AsyncTask<Object[], Void, List<Statistics>>{
-        Thread pointsThread;
-
+        PointsThread pointsThread;
+        StatisticsGenerator.StatisticsGeneratorBox statisticsGeneratorBox;
+        private boolean interrupted = false;
         @Override
         protected void onPreExecute() {
             pointsTextView.setVisibility(View.VISIBLE);
-            pointsThread = new Thread(new PointsLoadingRunner(pointsTextView));
+            pointsTextView.setOnClickListener(v -> {
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(TexasModuleActivity.this);
+                alertBuilder.setMessage("Do you want to stop calculations?");
+                alertBuilder.setNegativeButton("No", (dialog, which) -> {});
+                alertBuilder.setPositiveButton("Yes", (dialog, which) -> statisticsGeneratorBox.interrupt());
+                alertBuilder.show();
+            });
+            pointsThread = new PointsThread(new PointsLoadingRunner(pointsTextView));
             pointsThread.start();
             setClickableButtons(false);
             statisticsAdapter.clearItems();
@@ -81,31 +94,51 @@ public class TexasModuleActivity extends AppCompatActivity {
             boolean draws = prefs.getBoolean("pref_drawsCheckBox", false);
             double minChanceOfGetting = ((double)Integer.valueOf(prefs.getString("pref_chanceOfGetting_limit","1")))/100;
             StatisticsSettings statisticsSettings = new StatisticsSettings(minChanceOfGetting,draws);
-            return StatisticsGenerator.getStatistics(hand, table, deck, playersCount, statisticsSettings, recyclerView);
+            statisticsGeneratorBox = new StatisticsGenerator.StatisticsGeneratorBox(hand, table, deck,
+                    playersCount, statisticsSettings, recyclerView);
+            try {
+                return statisticsGeneratorBox.getStatistics();
+            } catch (InterruptedException e) {
+                interrupted = true;
+
+                return new ArrayList<>();
+            }
         }
 
+        @SuppressLint({"DefaultLocale", "SetTextI18n"})
         @Override
         protected void onPostExecute(List<Statistics> statistics) {
             setClickableButtons(true);
             if(getUsedCardCount() == 7)
                 addCardButton.setClickable(false);
+            if(!interrupted){
+                pointsThread.setFinalText("overall chance: "
+                        + String.format("%.2f", StatisticsGenerator.getChanceOfWinning(statistics)*100)+"%");
+                pointsTextView.setOnClickListener(v -> {});
+            }
+            else{
+                pointsThread.setFinalText("restart");
+                pointsTextView.setOnClickListener(v -> {
+                    statisticsAdapter.clearItems();
+                    runUpdateStatistics();
+                });
+            }
             pointsThread.interrupt();
-            pointsTextView.setVisibility(View.INVISIBLE);
         }
     }
 
     private void runUpdateStatistics(){
-        if (getUsedCardCount() == 2) {
-            setHandPower();
+        if(getUsedCardCount() != 0){
+            randomButton.setText("undo");
+            randomButton.setOnClickListener(v -> undo());
         }
-        else if (getUsedCardCount() <= 7)
+        if (getUsedCardCount() == 2)
+            setHandPower();
+        else if (getUsedCardCount() <= 7 && getUsedCardCount() >= 5)
             new UpdateStatisticsAsync().execute();
-        else
-            throw new RuntimeException("to many cards!");
 
         if (getUsedCardCount() == 7)
             addCardButton.setClickable(false);
-
     }
 
     @SuppressLint("SetTextI18n")
@@ -133,38 +166,86 @@ public class TexasModuleActivity extends AppCompatActivity {
             restart();
         });
         addPlayerButton.setOnClickListener(v -> {
-            playersCount++;
+            if(++playersCount > 12){
+                playersCount--;
+                return;
+            }
             setPlayersCountTextView();
         });
         minusPlayerButton.setOnClickListener(v -> {
-            playersCount--;
+            if(--playersCount < 2){
+                playersCount++;
+                return;
+            }
             setPlayersCountTextView();
         });
-        randomButton.setOnClickListener(v -> {
-            restart();
-            for (int i=0;i<2;i++){
-                Card card = getRandomCard(deck);
-                hand.add(card);
-                deck.remove(card);
-                setCardViewActive(cardImages.get(i), card);
-            }
+        randomButton.setOnClickListener(v -> undo());
+    }
 
-            for (int i=0;i<3;i++){
-                Card card = getRandomCard(deck);
-                table.add(card);
-                deck.remove(card);
-                setCardViewActive(cardImages.get(i+2), card);
-            }
+    private void undo(){
+        if(getUsedCardCount() == 0){
+            randomButton.setText("random");
+            pointsTextView.setText("");
+            pointsTextView.setClickable(false);
+            randomButton.setOnClickListener(v -> {
+                randomButton.setOnClickListener(v1 -> undo());
+                randomize();
+                randomButton.setText("undo");
+            });
+            return;
+        }
+        setCardViewInactive(cardImages.get(getUsedCardCount()-1));
+        statisticsAdapter.clearItems();
+        addCardButton.setClickable(true);
+        Card removed;
+        if(getUsedCardCount() <= 2){
+            removed = hand.get(hand.size()-1);
+            hand.remove(hand.size()-1);
+            handPowerTextView.setText("");
+        }
+        else{
+            removed = table.get(table.size()-1);
+            table.remove(table.size()-1);
+        }
 
-            setHandPower();
+        deck.add(removed);
+        for (CardInDialog cardInDialog : listOfCardsInDialog)
+            if(cardInDialog.getCard().equals(removed))
+                cardInDialog.setUsed(false);
 
-            Log.println(Log.ASSERT, "XD", hand.toString());
-            Log.println(Log.ASSERT, "XD", table.toString());
-            Log.println(Log.ASSERT, "XD", Integer.toString(deck.size()) + " " + deck.toString());
+        if(getUsedCardCount() >= 5){
+            pointsTextView.setText("restart");
+            pointsTextView.setOnClickListener(v -> runUpdateStatistics());
+        }
+        else{
+            pointsTextView.setText("");
+            pointsTextView.setClickable(false);
+        }
+    }
 
-            runUpdateStatistics();
+    private void randomize(){
+        restart();
+        for (int i=0;i<2;i++){
+            Card card = getRandomCard(deck);
+            hand.add(card);
+            deck.remove(card);
+            setCardViewActive(cardImages.get(i), card);
+        }
 
-        });
+        for (int i=0;i<3;i++){
+            Card card = getRandomCard(deck);
+            table.add(card);
+            deck.remove(card);
+            setCardViewActive(cardImages.get(i+2), card);
+        }
+
+        setHandPower();
+
+        for (CardInDialog cardInDialog : listOfCardsInDialog){
+            if(!deck.contains(cardInDialog.getCard()))
+                cardInDialog.setUsed(true);
+        }
+        runUpdateStatistics();
     }
 
     private void initializeViews(){
@@ -202,6 +283,9 @@ public class TexasModuleActivity extends AppCompatActivity {
         listOfCardsInDialog = CardInDialog.getDeckCardInDialog();
         setPlayersCountTextView();
         handPowerTextView.setVisibility(View.INVISIBLE);
+        handPowerTextView.setText("");
+        pointsTextView.setVisibility(View.INVISIBLE);
+        pointsTextView.setText("");
         statisticsAdapter.clearItems();
 
         setClickableButtons(true);
@@ -218,7 +302,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         }
         Double handPower = HandPower.getHandPower(hand.get(0), hand.get(1), this);
         handPowerTextView.setVisibility(View.VISIBLE);
-        handPowerTextView.setText("HAND POWER: " + String.format("%.1f", handPower) + "%");
+        handPowerTextView.setText("hand power: " + String.format("%.1f", handPower) + "%");
     }
 
     private int getUsedCardCount(){
@@ -235,6 +319,10 @@ public class TexasModuleActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void setPlayersCountTextView(){
+        if(statisticsAdapter.getItemCount() > 0){
+            pointsTextView.setText("restart");
+            pointsTextView.setOnClickListener(v -> runUpdateStatistics());
+        }
         playersCountTextView.setText("players:\n" + playersCount);
     }
 
@@ -258,7 +346,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()){
             case R.id.multiplayer:
-                this.startActivity(new Intent(this, MultiplayerActivity.class));
+                this.startActivity(new Intent(this, LogIn.class));
                 return true;
             case R.id.settings:
                 this.startActivity(new Intent(this, SettingsActivity.class));
@@ -291,7 +379,8 @@ public class TexasModuleActivity extends AppCompatActivity {
             hand.add(card);
         else
             table.add(card);
-        Picasso.with(this).load(Deck.getCardImageId(card)).noFade().into(cardImages.get(getUsedCardCount()-1));
+        cardImages.get(getUsedCardCount()-1).setImageResource(Deck.getCardImageId(card));
+//        Picasso.with(this).load(Deck.getCardImageId(card)).noFade().into(cardImages.get(getUsedCardCount()-1));
         deck.remove(card);
     }
 

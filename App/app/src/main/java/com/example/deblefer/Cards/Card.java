@@ -18,6 +18,12 @@ public class Card implements Comparable<Card>{
         public String getSimpleName(){
             return this.power == 10 ? "T" : power < 11 ? getPower().toString() : name().substring(0, 1);
         }
+
+
+        @Override
+        public String toString() {
+            return name().substring(0, 1).toUpperCase() + name().substring(1).toLowerCase();
+        }
     }
 
     public enum Suit { CLUBS(1), DIAMONDS(2), HEARTS(3), SPADES(4);
@@ -28,6 +34,11 @@ public class Card implements Comparable<Card>{
 
         public Integer getPower() {
             return power;
+        }
+
+        @Override
+        public String toString() {
+            return name().substring(0, 1).toUpperCase() + name().substring(1).toLowerCase();
         }
     }
 

@@ -7,15 +7,20 @@ import java.util.concurrent.TimeUnit;
 
 public class PointsLoadingRunner implements Runnable {
     private TextView textView;
+    private volatile String finalText = "";
     private String[] text = new String[3];
     {
-        text[0] = ":";
-        text[1] = "::";
-        text[2] = ":::";
+        text[0] = "°";
+        text[1] = "°°";
+        text[2] = "°°°";
     }
 
     public PointsLoadingRunner(TextView textView) {
         this.textView = textView;
+    }
+
+    public void setFinalText(String text){
+        finalText = text;
     }
 
     @Override
@@ -26,13 +31,12 @@ public class PointsLoadingRunner implements Runnable {
                 if(i == 999999)
                     i = 0;
                 int finalI = i%3;
-                Log.println(Log.ASSERT, "XD", "pointed!");
                 textView.post(() -> textView.setText(text[finalI]));
                 TimeUnit.MILLISECONDS.sleep(1000);
                 i++;
             }
         } catch (Exception e) {
-            textView.post(() -> textView.setText(""));
+            textView.post(() -> textView.setText(finalText));
         }
     }
 }

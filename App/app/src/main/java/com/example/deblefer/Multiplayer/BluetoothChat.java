@@ -71,6 +71,9 @@ public class BluetoothChat extends Activity {
 		}
 		TextView textViewWelcome = findViewById(R.id.textViewWelcome);
 		textViewWelcome.setText("Welcome " + LogIn.name+"!");
+
+
+
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package com.example.deblefer.Adapters;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.example.deblefer.Cards.Card;
 import com.example.deblefer.Cards.Deck;
+import com.example.deblefer.Dialogs.StatsSmallDialog;
 import com.example.deblefer.Statistics.Statistics;
 import com.example.deblefer.R;
 
@@ -21,9 +22,10 @@ import java.util.List;
 public class StatisticsViewAdapter extends RecyclerView.Adapter<StatisticsViewAdapter.ViewHolder> {
 
     private List<Statistics> listOfStats;
-    private Context context;
+    private Activity activity;
 
-    public StatisticsViewAdapter(List<Statistics> listOfStats) {
+    public StatisticsViewAdapter(List<Statistics> listOfStats, Activity activity) {
+        this.activity = activity;
         this.listOfStats = listOfStats;
     }
 
@@ -64,6 +66,10 @@ public class StatisticsViewAdapter extends RecyclerView.Adapter<StatisticsViewAd
         int i = 0;
         for(ImageView imageView : holder.cardImages)
             imageView.setImageResource(getCardId(listOfCards, i++));
+        holder.itemView.setOnClickListener(v -> {
+            StatsSmallDialog smallDialog = new StatsSmallDialog(activity, stat);
+            smallDialog.getDialog().show();
+        });
     }
 
     @Override
@@ -81,7 +87,7 @@ public class StatisticsViewAdapter extends RecyclerView.Adapter<StatisticsViewAd
         public TextView textView2;
         public TextView textView3;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow1));
             cardImages.add((ImageView) itemView.findViewById(R.id.cardInRow2));

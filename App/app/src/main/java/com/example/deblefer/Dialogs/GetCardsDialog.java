@@ -21,7 +21,6 @@ public class GetCardsDialog{
     private RecyclerView recyclerView;
     private CardRecyclerViewAdapterImproved adapter;
     private TexasModuleActivity activity;
-    private Collection<Card> cards;
 
     public GetCardsDialog(TexasModuleActivity activity, CardRecyclerViewAdapterImproved adapter){
         this.activity = activity;
@@ -33,10 +32,9 @@ public class GetCardsDialog{
         builder.setTitle("SELECT CARDS");
         recyclerView = new RecyclerView(builder.getContext());
         GridLayoutManager manager = new GridLayoutManager(activity, 4);
-        manager.setSmoothScrollbarEnabled(true);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
-        recyclerView.setHasFixedSize(true);
+        recyclerView.setNestedScrollingEnabled(false);
         builder.setView(recyclerView);
         builder.setNegativeButton("CANCEL", (dialog, which) -> {
             activity.rejectChosenCardsInDialog();
