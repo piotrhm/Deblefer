@@ -54,16 +54,12 @@ public class StatisticsGenerator {
         return result;
     }
 
-    private Double getChanceOfGetting(Figure figure, Collection<Card> usedCards){
+    private List<Integer> getCounts(Figure figure, Collection<Card> usedCards){
         List<Integer> counts = new ArrayList<>();
         if(figure.getCategory() == Figure.Category.STRAIGHT_FLUSH){
             Collection<Card> needed = new HashSet<>(usedCards);
             needed.retainAll(unused);
-            if(needed.size() == 0)
-                return 1.0;
-            if(needed.size() > 2)
-                return 0.0;
-            for(Card card : needed)
+            for(Card ignored : needed)
                 counts.add(1);
         }
         else if(figure.getCategory() == Figure.Category.FLUSH){
@@ -72,19 +68,16 @@ public class StatisticsGenerator {
             for (Card card : unused)
                 if (card.getSuit().equals(suit))
                     count++;
-            if(count <= 8)
-                return 1.0;
-            if(count > 10)
-                return 0.0;
-            counts.add(count);
-            if(count == 10)
-                counts.add(count-1);
+            for (int i = 0; i < count - 8; i++)
+                counts.add(count);
+            if(counts.size() >= 2)
+                counts.set(0, -counts.get(0));
         }
         else
         {
             /*
-            * do streamów potrzebne jest wysokie API ;_;
-            * */
+             * do streamów potrzebne jest wysokie API ;_;
+             * */
             List<Card> playerCards = new ArrayList<>(hand);
             playerCards.addAll(table);
             List<Card.Rank> playersRanks = new ArrayList<>();
@@ -95,25 +88,42 @@ public class StatisticsGenerator {
                 if(!playersRanks.remove(rank))
                     needed.add(rank);
             }
-            if(needed.size() == 0)
-                return 1.0;
-            if(needed.size() > 2)
-                return 0.0;
+            for (Card.Rank rank : needed)
+                counts.add(getUnusedRankCount(rank));
 
-            if(needed.size() == 2 && needed.get(0).equals(needed.get(1))){
-                counts.add(getUnusedRankCount(needed.get(0)));
-                counts.add(counts.get(0)-1);
-            }
-            else {
-                for(Card.Rank rank : needed)
-                    counts.add(getUnusedRankCount(rank));
-            }
+            if(needed.size() == 2 && needed.get(0).equals(needed.get(1)))
+                counts.set(0, -counts.get(0));
         }
+        return counts;
+    }
 
-        Double res = 1.0;
-        for (Integer i : counts)
-            res *= (2.0*i)/unused.size();
-        return res/counts.size();
+    private Double getChanceOfGettingFlop(Figure figure, Collection<Card> usedCards){
+        List<Integer> counts = getCounts(figure, usedCards);
+
+        if(counts.size() > 2)
+            return 0.0;
+        if(counts.size() == 0)
+            return 1.0;
+
+        boolean same = (counts.get(0) < 0);
+        int k = counts.get(0);
+        int s = unused.size();
+
+        if(same)
+            return (k*(k-1))/(double)(s*(s-1));
+        if(counts.size() == 1)
+            return 2*(k*(s-k))/(double)(s*(s-1)) + (k*(k-1))/(double)(s*(s-1));
+        int l = counts.get(1);
+        return 2*(k*l)/(double)(s*(s-1));
+    }
+
+    private Double getChanceOfGettingTurn(Figure figure, Collection<Card> usedCards){
+        List<Integer> counts = getCounts(figure, usedCards);
+        if(counts.size() > 1)
+            return 0.0;
+        if(counts.size() == 0)
+            return 1.0;
+        return (double)counts.get(0)/unused.size();
     }
 
     private int getUnusedRankCount(Card.Rank rank){
@@ -295,7 +305,7 @@ public class StatisticsGenerator {
             if(recyclerView != null)
                 recyclerView.post(() -> {
                     StatisticsViewAdapter adapter = (StatisticsViewAdapter)recyclerView.getAdapter();
-                    adapter.addItem(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards).setChanceToGet(getChanceOfGetting(playerFigure, usedCards)));
+                    adapter.addItem(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards).setChanceToGet(getChanceOfGettingFlop(playerFigure, usedCards)));
                 });
         }
     }
@@ -435,7 +445,7 @@ public class StatisticsGenerator {
             if(recyclerView != null)
                 recyclerView.post(() -> {
                     StatisticsViewAdapter adapter = (StatisticsViewAdapter)recyclerView.getAdapter();
-                    adapter.addItem(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards).setChanceToGet(getChanceOfGetting(playerFigure, usedCards)));
+                    adapter.addItem(new Statistics(playerFigure,chanceGetting,chanceOfWinning,chanceOfDraw,usedCards).setChanceToGet(getChanceOfGettingTurn(playerFigure, usedCards)));
                 });
 
         }
@@ -544,7 +554,7 @@ public class StatisticsGenerator {
         if(recyclerView != null)
             recyclerView.post(() -> {
                 StatisticsViewAdapter adapter = (StatisticsViewAdapter)recyclerView.getAdapter();
-                adapter.addItem(new Statistics(playerFigure,1.0,chanceOfWinning,chanceOfDraw,usedCards).setChanceToGet(getChanceOfGetting(playerFigure, usedCards)));
+                adapter.addItem(new Statistics(playerFigure,1.0,chanceOfWinning,chanceOfDraw,usedCards).setChanceToGet(1.0));
             });
     }
 
