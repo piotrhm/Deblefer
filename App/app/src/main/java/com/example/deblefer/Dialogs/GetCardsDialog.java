@@ -32,8 +32,11 @@ public class GetCardsDialog{
         builder.setTitle("SELECT CARDS");
         recyclerView = new RecyclerView(builder.getContext());
         GridLayoutManager manager = new GridLayoutManager(activity, 4);
+        manager.setItemPrefetchEnabled(true);
+        manager.setInitialPrefetchItemCount(52);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
+        recyclerView.setItemViewCacheSize(52);
         recyclerView.setNestedScrollingEnabled(false);
         builder.setView(recyclerView);
         builder.setNegativeButton("CANCEL", (dialog, which) -> {

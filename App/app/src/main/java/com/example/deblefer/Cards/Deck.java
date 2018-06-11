@@ -50,7 +50,7 @@ public class Deck {
     public static void initializeCardsImagesIds(Context context){
         cardsImagesId = new HashMap<>();
         for (Card card : cards){
-            int id = context.getResources().getIdentifier(card.toString(), "drawable", context.getPackageName());
+            int id = context.getResources().getIdentifier("b_" + card.toString(), "drawable", context.getPackageName());
             cardsImagesId.put(card, id);
         }
 
