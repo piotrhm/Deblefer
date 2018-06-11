@@ -166,7 +166,7 @@ public class TexasModuleActivity extends AppCompatActivity {
             restart();
         });
         addPlayerButton.setOnClickListener(v -> {
-            if(++playersCount > 12){
+            if(++playersCount > 7){
                 playersCount--;
                 return;
             }

@@ -76,12 +76,12 @@ public class Statistics implements Comparable<Statistics>{
 
     @Override
     public int compareTo(@NonNull Statistics o) {
-        if(Double.compare(chanceToWin* chanceToGet, o.chanceToWin*o.chanceToGet) == 0){
-            if(Double.compare(chanceToGet, o.chanceToGet) == 0)
+        if(Double.compare(chanceToWin*chanceToGetAsHighest, o.chanceToWin*o.chanceToGetAsHighest) == 0){
+            if(Double.compare(chanceToGetAsHighest, o.chanceToGetAsHighest) == 0)
                 return figure.compareTo(o.figure);
-            return Double.compare(chanceToGet, o.chanceToGet);
+            return Double.compare(chanceToGetAsHighest, o.chanceToGetAsHighest);
         }
-        return Double.compare(chanceToWin* chanceToGet, o.chanceToWin*o.chanceToGet);
+        return Double.compare(chanceToWin*chanceToGetAsHighest, o.chanceToWin*o.chanceToGetAsHighest);
     }
 
 
