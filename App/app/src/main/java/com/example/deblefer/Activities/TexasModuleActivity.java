@@ -345,9 +345,9 @@ public class TexasModuleActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()){
-            case R.id.multiplayer:
+            /*case R.id.multiplayer:
                 this.startActivity(new Intent(this, LogIn.class));
-                return true;
+                return true;*/
             case R.id.settings:
                 this.startActivity(new Intent(this, SettingsActivity.class));
                 return true;

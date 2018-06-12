@@ -51,9 +51,11 @@ public class CardRecyclerViewAdapterImproved extends  RecyclerView.Adapter<CardR
         ImageView cardImage = holder.cardImage;
         if (cardInDialog.isUsed()){
             Picasso.with(activity).load(R.drawable.unused).noFade().into(cardImage);
+//            cardImage.setImageResource(R.drawable.unused);
         }
         else {
             Picasso.with(activity).load(Deck.getCardImageId(cardInDialog.getCard())).noFade().into(cardImage);
+//            cardImage.setImageResource(Deck.getCardImageId(cardInDialog.getCard()));
             cardImage.setOnClickListener(v -> onClick(cardInDialog, cardImage));
         }
     }
