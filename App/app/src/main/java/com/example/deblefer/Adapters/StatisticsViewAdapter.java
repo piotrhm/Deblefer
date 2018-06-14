@@ -66,10 +66,7 @@ public class StatisticsViewAdapter extends RecyclerView.Adapter<StatisticsViewAd
         int i = 0;
         for(ImageView imageView : holder.cardImages)
             imageView.setImageResource(getCardId(listOfCards, i++));
-        holder.itemView.setOnClickListener(v -> {
-            StatsSmallDialog smallDialog = new StatsSmallDialog(activity, stat);
-            smallDialog.getDialog().show();
-        });
+        holder.itemView.setOnClickListener(v -> new StatsSmallDialog(activity, stat).getDialog().show());
     }
 
     @Override

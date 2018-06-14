@@ -1,7 +1,6 @@
 package com.example.deblefer.Activities;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -10,10 +9,8 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,31 +18,24 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.deblefer.Adapters.CardRecyclerViewAdapter;
-import com.example.deblefer.Adapters.CardRecyclerViewAdapterImproved;
 import com.example.deblefer.Cards.Card;
 import com.example.deblefer.Cards.CardInDialog;
 import com.example.deblefer.Classes.PointsThread;
-import com.example.deblefer.Dialogs.CustomDialog;
 import com.example.deblefer.Cards.Deck;
 import com.example.deblefer.Dialogs.GetCardsDialog;
-import com.example.deblefer.Multiplayer.LogIn;
 import com.example.deblefer.Statistics.HandPower;
 import com.example.deblefer.Classes.PointsLoadingRunner;
 import com.example.deblefer.Statistics.Statistics;
-import com.example.deblefer.Statistics.StatisticsGenerator;
+import com.example.deblefer.Statistics.StatisticsGeneratorBox;
 import com.example.deblefer.Statistics.StatisticsSettings;
 import com.example.deblefer.Adapters.StatisticsViewAdapter;
 import com.example.deblefer.R;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-
-import static com.example.deblefer.Statistics.StatisticsGenerator.getChanceOfWinning;
 
 public class TexasModuleActivity extends AppCompatActivity {
 
@@ -68,18 +58,19 @@ public class TexasModuleActivity extends AppCompatActivity {
     private Button randomButton;
     private FloatingActionButton addCardButton;
 
+    @SuppressLint("StaticFieldLeak")
     private class UpdateStatisticsAsync extends AsyncTask<Object[], Void, List<Statistics>>{
         PointsThread pointsThread;
-        StatisticsGenerator.StatisticsGeneratorBox statisticsGeneratorBox;
+        StatisticsGeneratorBox statisticsGeneratorBox;
         private boolean interrupted = false;
         @Override
         protected void onPreExecute() {
             pointsTextView.setVisibility(View.VISIBLE);
             pointsTextView.setOnClickListener(v -> {
                 AlertDialog.Builder alertBuilder = new AlertDialog.Builder(TexasModuleActivity.this);
-                alertBuilder.setMessage("Do you want to stop calculations?");
-                alertBuilder.setNegativeButton("No", (dialog, which) -> {});
-                alertBuilder.setPositiveButton("Yes", (dialog, which) -> statisticsGeneratorBox.interrupt());
+                alertBuilder.setMessage("Do you want to stop calculations?")
+                        .setNegativeButton("No", (dialog, which) -> {})
+                        .setPositiveButton("Yes", (dialog, which) -> statisticsGeneratorBox.interrupt());
                 alertBuilder.show();
             });
             pointsThread = new PointsThread(new PointsLoadingRunner(pointsTextView));
@@ -90,17 +81,12 @@ public class TexasModuleActivity extends AppCompatActivity {
 
         @Override
         protected List<Statistics> doInBackground(Object[]... objects) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(TexasModuleActivity.this);
-            boolean draws = prefs.getBoolean("pref_drawsCheckBox", false);
-            double minChanceOfGetting = ((double)Integer.valueOf(prefs.getString("pref_chanceOfGetting_limit","1")))/100;
-            StatisticsSettings statisticsSettings = new StatisticsSettings(minChanceOfGetting,draws);
-            statisticsGeneratorBox = new StatisticsGenerator.StatisticsGeneratorBox(hand, table, deck,
+            StatisticsSettings statisticsSettings = new StatisticsSettings(TexasModuleActivity.this);               statisticsGeneratorBox = new StatisticsGeneratorBox(hand, table, deck,
                     playersCount, statisticsSettings, recyclerView);
             try {
                 return statisticsGeneratorBox.getStatistics();
             } catch (InterruptedException e) {
                 interrupted = true;
-
                 return new ArrayList<>();
             }
         }
@@ -113,7 +99,7 @@ public class TexasModuleActivity extends AppCompatActivity {
                 addCardButton.setClickable(false);
             if(!interrupted){
                 pointsThread.setFinalText("overall chance: "
-                        + String.format("%.2f", StatisticsGenerator.getChanceOfWinning(statistics)*100)+"%");
+                        + String.format("%.2f", StatisticsGeneratorBox.getChanceOfWinning(statistics)*100)+"%");
                 pointsTextView.setOnClickListener(v -> {});
             }
             else{
@@ -127,6 +113,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void runUpdateStatistics(){
         if(getUsedCardCount() != 0){
             randomButton.setText("undo");
@@ -152,6 +139,34 @@ public class TexasModuleActivity extends AppCompatActivity {
         restart();
     }
 
+    private void initializeViews(){
+
+        setContentView(R.layout.nested_scroll_view);
+
+        cardImages.add((ImageView) findViewById(R.id.cardImageView0));
+        cardImages.add((ImageView) findViewById(R.id.cardImageView1));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView2));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView3));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView4));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView5));
+        cardImages.add((ImageView)findViewById(R.id.cardImageView6));
+
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setNestedScrollingEnabled(false);
+        recyclerView.setAdapter(statisticsAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
+
+        addCardButton = findViewById(R.id.addCardButton);
+        randomButton = findViewById(R.id.randomButton);
+        passButton = findViewById(R.id.passButton);
+        minusPlayerButton = findViewById(R.id.minusPlayerButton);
+        addPlayerButton = findViewById(R.id.addPlayerButton);
+        playersCountTextView = findViewById(R.id.playersCountTextView);
+        handPowerTextView = findViewById(R.id.handPowerTextView);
+        pointsTextView = findViewById(R.id.pointsTextView);
+        pointsTextView.setVisibility(View.INVISIBLE);
+    }
+
     private void initializeListeners(){
         addCardButton.setOnClickListener(v -> {
             int maxCardsCount = 1;
@@ -159,45 +174,46 @@ public class TexasModuleActivity extends AppCompatActivity {
                 maxCardsCount = 2-getUsedCardCount();
             else if (getUsedCardCount() < 5)
                 maxCardsCount = 5-getUsedCardCount();
-            GetCardsDialog dialog = new GetCardsDialog(this, new CardRecyclerViewAdapterImproved(this, listOfCardsInDialog , maxCardsCount));
+            GetCardsDialog dialog = new GetCardsDialog(this, listOfCardsInDialog, maxCardsCount);
             dialog.getDialog().show();
         });
-        passButton.setOnClickListener(v -> {
-            restart();
-        });
+        passButton.setOnClickListener(v -> restart());
         addPlayerButton.setOnClickListener(v -> {
-            if(++playersCount > 7){
-                playersCount--;
+            if(playersCount >= 6)
                 return;
-            }
+            playersCount++;
             setPlayersCountTextView();
         });
         minusPlayerButton.setOnClickListener(v -> {
-            if(--playersCount < 2){
-                playersCount++;
+            if(playersCount <= 2)
                 return;
-            }
+            playersCount--;
             setPlayersCountTextView();
         });
         randomButton.setOnClickListener(v -> undo());
     }
 
+    @SuppressLint("SetTextI18n")
     private void undo(){
         if(getUsedCardCount() == 0){
             randomButton.setText("random");
             pointsTextView.setText("");
             pointsTextView.setClickable(false);
             randomButton.setOnClickListener(v -> {
-                randomButton.setOnClickListener(v1 -> undo());
+                randomButton.setClickable(false);
                 randomize();
                 randomButton.setText("undo");
+                randomButton.setOnClickListener(v1 -> undo());
+                randomButton.setClickable(false);
             });
             return;
         }
+
         setCardViewInactive(cardImages.get(getUsedCardCount()-1));
         statisticsAdapter.clearItems();
         addCardButton.setClickable(true);
         Card removed;
+
         if(getUsedCardCount() <= 2){
             removed = hand.get(hand.size()-1);
             hand.remove(hand.size()-1);
@@ -209,6 +225,7 @@ public class TexasModuleActivity extends AppCompatActivity {
         }
 
         deck.add(removed);
+
         for (CardInDialog cardInDialog : listOfCardsInDialog)
             if(cardInDialog.getCard().equals(removed))
                 cardInDialog.setUsed(false);
@@ -248,46 +265,19 @@ public class TexasModuleActivity extends AppCompatActivity {
         runUpdateStatistics();
     }
 
-    private void initializeViews(){
-
-        setContentView(R.layout.nested_scroll_view);
-
-        cardImages.add((ImageView) findViewById(R.id.cardImageView0));
-        cardImages.add((ImageView) findViewById(R.id.cardImageView1));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView2));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView3));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView4));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView5));
-        cardImages.add((ImageView)findViewById(R.id.cardImageView6));
-
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setNestedScrollingEnabled(false);
-        recyclerView.setAdapter(statisticsAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(TexasModuleActivity.this));
-
-        addCardButton = findViewById(R.id.addCardButton);
-        randomButton = findViewById(R.id.randomButton);
-        passButton = findViewById(R.id.passButton);
-        minusPlayerButton = findViewById(R.id.minusPlayerButton);
-        addPlayerButton = findViewById(R.id.addPlayerButton);
-        playersCountTextView = findViewById(R.id.playersCountTextView);
-        handPowerTextView = findViewById(R.id.handPowerTextView);
-        pointsTextView = findViewById(R.id.pointsTextView);
-        pointsTextView.setVisibility(View.INVISIBLE);
-    }
-
     private void restart(){
         deck = Deck.getModifableDeckAsSet();
         table = new ArrayList<>();
         hand = new ArrayList<>();
+
         listOfCardsInDialog = CardInDialog.getDeckCardInDialog();
-        setPlayersCountTextView();
         handPowerTextView.setVisibility(View.INVISIBLE);
         handPowerTextView.setText("");
         pointsTextView.setVisibility(View.INVISIBLE);
         pointsTextView.setText("");
         statisticsAdapter.clearItems();
 
+        setPlayersCountTextView();
         setClickableButtons(true);
 
         for (ImageView cardView : cardImages)
@@ -329,7 +319,7 @@ public class TexasModuleActivity extends AppCompatActivity {
     private <T> T getRandomCard(Collection<T> from) {
         Random rnd = new Random();
         int i = rnd.nextInt(from.size());
-        return new ArrayList<T>(Collections.unmodifiableCollection(from)).get(i);
+        return new ArrayList<>(Collections.unmodifiableCollection(from)).get(i);
     }
 
     @Override
@@ -341,9 +331,6 @@ public class TexasModuleActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()){
             /*case R.id.multiplayer:
                 this.startActivity(new Intent(this, LogIn.class));
@@ -391,5 +378,4 @@ public class TexasModuleActivity extends AppCompatActivity {
         passButton.setClickable(clickable);
         randomButton.setClickable(clickable);
     }
-
 }

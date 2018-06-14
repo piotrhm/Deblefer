@@ -22,6 +22,16 @@ public class Statistics implements Comparable<Statistics>{
     private Double chanceToDraw;
     private List<Card> usedCards;
 
+    Statistics(Figure figure, double chanceToGetAsHighest, double chanceToWin, double chanceToDraw, Collection<Card> usedCards){
+        this.figure = figure;
+        this.chanceToGetAsHighest = chanceToGetAsHighest;
+        this.chanceToGet = 0d;
+        this.chanceToWin = chanceToWin;
+        this.chanceToDraw = chanceToDraw;
+        this.usedCards = new ArrayList<>(usedCards);
+        Collections.sort(this.usedCards);
+    }
+
     public Double getChanceOfGettingAsHighest() { return chanceToGetAsHighest; }
 
     public Double getChanceOfGetting() {
@@ -34,15 +44,6 @@ public class Statistics implements Comparable<Statistics>{
 
     public List<Card> getUsedCards(){return usedCards;}
 
-    Statistics(Figure figure, double chanceToGetAsHighest, double chanceToWin, double chanceToDraw, Collection<Card> usedCards){
-        this.figure = figure;
-        this.chanceToGetAsHighest = chanceToGetAsHighest;
-        this.chanceToGet = 0d;
-        this.chanceToWin = chanceToWin;
-        this.chanceToDraw = chanceToDraw;
-        this.usedCards = new ArrayList<>(usedCards);
-        Collections.sort(this.usedCards);
-    }
 
     public Statistics setChanceToGet(Double chanceToGet) {
         this.chanceToGet = chanceToGet;
@@ -52,11 +53,6 @@ public class Statistics implements Comparable<Statistics>{
     public Figure getFigure() {
         return figure;
     }
-
-    /*@Override
-    public String toString() {
-        return figure + " " + chanceToGetAsHighest + " " + chanceToWin + " " + chanceToDraw ;
-    }*/
 
     @Override
     public String toString() {

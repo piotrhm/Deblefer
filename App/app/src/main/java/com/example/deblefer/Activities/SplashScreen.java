@@ -19,15 +19,12 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-        mProgress = (ProgressBar) findViewById(R.id.splash_screen_progress_bar);
+        mProgress = findViewById(R.id.splash_screen_progress_bar);
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                fillBar();
-                startActivity(new Intent(SplashScreen.this, TexasModuleActivity.class));
-                finish();
-            }
+        new Handler().postDelayed(() -> {
+            fillBar();
+            startActivity(new Intent(SplashScreen.this, TexasModuleActivity.class));
+            finish();
         }, SPLASH_TIME_OUT);
     }
 

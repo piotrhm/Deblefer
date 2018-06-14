@@ -12,8 +12,8 @@ public class Figure implements Comparable<Figure>{
 
     public enum Category {
         HIGH_CARD(0), ONE_PAIR(1), TWO_PAIR(2), THREE_OF_A_KIND(3), STRAIGHT(4), FLUSH(5), FULL_HOUSE(6), FOUR_OF_A_KIND(7), STRAIGHT_FLUSH(8);
-
         private int power;
+
         Category(int power){
             this.power = power;
         }
@@ -21,7 +21,6 @@ public class Figure implements Comparable<Figure>{
         public Integer getPower() {
             return power;
         }
-
 
         @Override
         public String toString() {
@@ -73,13 +72,13 @@ public class Figure implements Comparable<Figure>{
     @Override
     public int compareTo(@NonNull Figure o) {
         int compare = this.getCategory().getPower().compareTo(o.category.getPower());
-        if(compare!=0) return compare;
+        if(compare!=0)
+            return compare;
         for(int i=0;i<this.getVitalRanks().length;i++){
             compare = this.getVitalRanks()[i].getPower().compareTo(o.getVitalRanks()[i].getPower());
-            if(compare!=0) return compare;
+            if(compare!=0)
+                return compare;
         }
         return 0;
-
     }
-
 }

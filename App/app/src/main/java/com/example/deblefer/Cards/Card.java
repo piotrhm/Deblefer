@@ -7,10 +7,14 @@ public class Card implements Comparable<Card>{
     public enum Rank { DEUCE(2), THREE(3), FOUR(4), FIVE(5), SIX(6), SEVEN(7), EIGHT(8), NINE(9), TEN(10),
         JACK(11), QUEEN(12), KING(13), ACE(14);
         private int power;
+
         Rank(int power){
             this.power = power;
         }
 
+        /*
+        * z kolejnoscia enumów podobno bywają problemy. Podobno
+        * */
         public Integer getPower() {
             return power;
         }
@@ -18,7 +22,6 @@ public class Card implements Comparable<Card>{
         public String getSimpleName(){
             return this.power == 10 ? "T" : power < 11 ? getPower().toString() : name().substring(0, 1);
         }
-
 
         @Override
         public String toString() {
@@ -28,6 +31,7 @@ public class Card implements Comparable<Card>{
 
     public enum Suit { CLUBS(1), DIAMONDS(2), HEARTS(3), SPADES(4);
         private int power;
+
         Suit(int power){
             this.power = power;
         }

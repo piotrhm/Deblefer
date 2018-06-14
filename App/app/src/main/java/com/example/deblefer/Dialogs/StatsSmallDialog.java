@@ -13,6 +13,7 @@ import com.example.deblefer.Cards.Card;
 import com.example.deblefer.Cards.Deck;
 import com.example.deblefer.R;
 import com.example.deblefer.Statistics.Statistics;
+import com.example.deblefer.Statistics.StatisticsSettings;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class StatsSmallDialog{
     @SuppressLint({"DefaultLocale", "SetTextI18n"})
     public AlertDialog getDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-//        builder.setTitle("STATISTICS");
+
         View view = activity.getLayoutInflater().inflate(R.layout.closer_statistics_view, null);
         ((TextView)view.findViewById(R.id.textViewGetting))
                 .setText(String.format("%.2f", stats.getChanceOfGetting()*100)+"%");
@@ -41,15 +42,14 @@ public class StatsSmallDialog{
                 .setText(String.format("%.2f", stats.getChanceOfGettingAsHighest()*100)+"%");
         ((TextView)view.findViewById(R.id.textViewWinning))
                 .setText(String.format("%.2f", stats.getChanceOfWinning()*100)+"%");
-        if(!PreferenceManager.getDefaultSharedPreferences(activity)
-                .getBoolean("pref_drawsCheckBox", false)){
+
+        if(!new StatisticsSettings(activity).isDrawWhenSameFigure()){
             ((TextView)view.findViewById(R.id.textViewDrawing))
                     .setText("-");
         }
         else
             ((TextView)view.findViewById(R.id.textViewDrawing))
                     .setText(String.format("%.2f", stats.getChanceOfDrawing()*100)+"%");
-
 
         ((TextView)view.findViewById(R.id.textViewFigure))
                 .setText(stats.toString());

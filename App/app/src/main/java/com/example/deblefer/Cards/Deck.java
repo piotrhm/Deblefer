@@ -14,7 +14,6 @@ public class Deck {
     private static Set<Card> cards = new HashSet<>();
     private static List<Card> listOfCards = new ArrayList<>();
     private static Map<Card, Integer> cardsImagesId = null;
-    private static List<List<Card>> fourCardsList = new ArrayList<>();
 
     static {
         for (Card.Rank rank : Card.Rank.values())
@@ -41,16 +40,19 @@ public class Deck {
         return new ArrayList<>(listOfCards);
     }
 
-    static class UninitializedArrayException extends RuntimeException{}
+    private static class UninitializedArrayException extends RuntimeException{}
 
     public static int getCardImageId(Card card){
+        /*if(cardsImagesId == null)
+            throw new UninitializedArrayException();*/
         return cardsImagesId.get(card);
     }
 
     public static void initializeCardsImagesIds(Context context){
         cardsImagesId = new HashMap<>();
         for (Card card : cards){
-            int id = context.getResources().getIdentifier("b_" + card.toString(), "drawable", context.getPackageName());
+            int id = context.getResources()
+                    .getIdentifier("b_" + card.toString(), "drawable", context.getPackageName());
             cardsImagesId.put(card, id);
         }
 

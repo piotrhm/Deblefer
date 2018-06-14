@@ -16,7 +16,6 @@ public class StatisticsSettings {
     }
 
     public StatisticsSettings(Double minChanceOfGetting, boolean drawWhenSameFigure){
-
         this.minChanceOfGetting = minChanceOfGetting;
         this.drawWhenSameFigure = drawWhenSameFigure;
     }

@@ -40,7 +40,7 @@ public class CardInDialog {
         return list;
     }
 
-    public static List<List<CardInDialog>> getDegeneratedCardInDialog(){
+    /*public static List<List<CardInDialog>> getDegeneratedCardInDialog(){
         List<List<CardInDialog>> fourCardsList = new ArrayList<>();
         for(Card.Rank rank : Card.Rank.values()){
             List<CardInDialog> cards1 = new ArrayList<>();
@@ -49,5 +49,5 @@ public class CardInDialog {
             fourCardsList.add(cards1);
         }
         return fourCardsList;
-    }
+    }*/
 }

@@ -25,7 +25,6 @@ public class HandPower {
         for (Card card1 : Deck.getUnmodifableDeckAsList())
             for(Card card2 : Deck.getUnmodifableDeckAsList())
                 hands.add(new Hand(card1, card2));
-
     }
 
     public static void initializePowers(Context context){
@@ -43,13 +42,12 @@ public class HandPower {
             for (int i = 0; i < 2*169-1; i+=2) {
                 powers.put(list.get(i), Double.parseDouble(list.get(i+1)));
             }
-            //return powers.toString();
         } catch (Exception e) {
             throw new InitializationError();
         }
     }
 
-    static class InitializationError extends RuntimeException{ }
+    public static class InitializationError extends RuntimeException{ }
 
     public static Double getHandPower(Card card1, Card card2, Context context){
         if(powers == null)

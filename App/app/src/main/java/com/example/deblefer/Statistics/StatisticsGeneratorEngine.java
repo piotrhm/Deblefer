@@ -16,8 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-
-public class StatisticsGenerator {
+class StatisticsGeneratorEngine {
 
     private volatile boolean interrupted = false;
     private int players;
@@ -28,30 +27,19 @@ public class StatisticsGenerator {
     private StatisticsSettings statisticsSettings;
     private RecyclerView recyclerView;
 
-    public void interrupt(){
+    void interrupt(){
         interrupted = true;
     }
 
-    public static class StatisticsGeneratorBox{
-        private StatisticsGenerator generator;
-        public StatisticsGeneratorBox(Collection<Card> hand, Collection<Card> table, Collection<Card> unused, int players,
-                               StatisticsSettings statisticsSettings, RecyclerView statisticsRecyclerView){
-            generator = new StatisticsGenerator(players, hand, table, unused, statisticsSettings, statisticsRecyclerView);
-        }
-        public List<Statistics> getStatistics() throws InterruptedException {
-            generator.generateStatistics();
-            return generator.statistics;
-        }
-        public void interrupt(){
-            generator.interrupt();
-        }
-    }
-
-    public static Double getChanceOfWinning(List<Statistics> statisticsList){
+    static Double getChanceOfWinning(List<Statistics> statisticsList){
         Double result = 0.0;
         for(Statistics stat : statisticsList)
             result += stat.getChanceOfGettingAsHighest()*stat.getChanceOfWinning();
         return result;
+    }
+
+    List<Statistics> getStatistics(){
+        return statistics;
     }
 
     private List<Integer> getCounts(Figure figure, Collection<Card> usedCards){
@@ -134,9 +122,9 @@ public class StatisticsGenerator {
         return count;
     }
 
-    private StatisticsGenerator(int players, Collection<Card> hand, Collection<Card> table,
-                                Collection<Card> unused, StatisticsSettings statisticsSettings,
-                                RecyclerView recyclerView){
+    StatisticsGeneratorEngine(int players, Collection<Card> hand, Collection<Card> table,
+                              Collection<Card> unused, StatisticsSettings statisticsSettings,
+                              RecyclerView recyclerView){
         this.players = players;
         this.hand = new HashSet<>(hand);
         this.table = new HashSet<>(table);
@@ -145,14 +133,7 @@ public class StatisticsGenerator {
         this.recyclerView = recyclerView;
     }
 
-   /* public static List<Statistics> getStatistics(Collection<Card> hand, Collection<Card> table, Collection<Card> unused, int players,
-                                                 StatisticsSettings statisticsSettings, RecyclerView statisticsRecyclerView) throws InterruptedException {
-        StatisticsGenerator generator = new StatisticsGenerator(players, hand, table, unused, statisticsSettings, statisticsRecyclerView);
-        generator.generateStatistics();
-        return generator.statistics;
-    }*/
-
-    private void generateStatistics() throws InterruptedException {
+    void generateStatistics() throws InterruptedException {
         switch (table.size()){
             case 0: beforeFlop(); break;
             case 3: afterFlop(); break;
@@ -1027,3 +1008,4 @@ public class StatisticsGenerator {
     }
 
 }
+

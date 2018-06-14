@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PointsLoadingRunner implements Runnable {
     private TextView textView;
-    private volatile String finalText = "";
+    private String finalText = "";
     private String[] text = new String[3];
     {
         text[0] = "°";
@@ -19,7 +19,7 @@ public class PointsLoadingRunner implements Runnable {
         this.textView = textView;
     }
 
-    public void setFinalText(String text){
+    public synchronized void setFinalText(String text){
         finalText = text;
     }
 

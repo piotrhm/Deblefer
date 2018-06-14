@@ -24,12 +24,6 @@ public class Hand {
             suitIsDifferent = true;
     }
 
-    public Hand(Card card1, Card card2, boolean suitIsDifferent){
-        this.card1 = card1;
-        this.card2 = card2;
-        this.suitIsDifferent = suitIsDifferent;
-    }
-
     public Card getCard1(){ return this.card1; }
     public Card getCard2(){ return this.card2; }
 
@@ -48,7 +42,6 @@ public class Hand {
     public String toString() {
         return card1.getRank().getSimpleName() + card2.getRank().getSimpleName() + (suitIsDifferent ? "o" : "s");
     }
-
 
     public Collection<Card> getCards(){
         Set<Card> set = new HashSet<>();
