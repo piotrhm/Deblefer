@@ -4,4 +4,4 @@ Deblefer is an app designed to help Texas Hold'em players to estimate their hand
 
 Here are some screenshots:
 
-You can download apk here: 
+You can download apk [here](App/app/release/app-release.apk).
