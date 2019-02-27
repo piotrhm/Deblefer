@@ -1,14 +1,7 @@
-#Deblefer
+# Deblefer
 
-twórcy:
-Magdalena Proszewska
-Piotr Gaiński
-Piotr Helm
+Deblefer is an app designed to help Texas Hold'em players to estimate their hand power and hence chance of winning. It gives accurate probabilities for specific hand values and introduce them in clear modern manner. It's designed to be user friendly, highly responsive and helpful.
 
-rozkład wkładu: 
-Magdalena Proszewska: 33,(3)%
-Piotr Gaiński: 33,(3)%
-Piotr Helm: 33,(3)%
+Here are some screenshots:
 
-uwagi:
-restrykcje względem API nie pozwalają na korzystanie ze streamów i predykatów, o ile celujemy w używalność na więcej niż jednym procencie urządzeń
+You can download apk here: 
